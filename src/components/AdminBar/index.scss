@@ -1,0 +1,9 @@
+.admin-bar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .admin-bar {
+    display: block;
+  }
+}
