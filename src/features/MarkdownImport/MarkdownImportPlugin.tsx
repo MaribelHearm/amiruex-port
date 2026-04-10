@@ -3,7 +3,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { createCommand, COMMAND_PRIORITY_NORMAL } from 'lexical'
-import { $convertFromMarkdownString, TRANSFORMERS } from '@lexical/markdown'
+import { $convertFromMarkdownString, TRANSFORMERS, CODE } from '@lexical/markdown'
+
+// Payload 使用自己的 Block-based 代码实现，@lexical/code 的 CodeNode 未注册
+// 移除 CODE block transformer 避免 "Node CodeNode has not been registered" 错误
+const PAYLOAD_SAFE_TRANSFORMERS = TRANSFORMERS.filter((t) => t !== CODE)
 
 export const OPEN_MARKDOWN_IMPORT_COMMAND = createCommand<void>('OPEN_MARKDOWN_IMPORT_COMMAND')
 
@@ -35,7 +39,7 @@ export function MarkdownImportPlugin() {
   const handleImport = useCallback(() => {
     if (!markdown.trim()) return
     editor.update(() => {
-      $convertFromMarkdownString(markdown, TRANSFORMERS)
+      $convertFromMarkdownString(markdown, PAYLOAD_SAFE_TRANSFORMERS)
     })
     setIsOpen(false)
   }, [editor, markdown])
