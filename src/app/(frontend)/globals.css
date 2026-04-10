@@ -618,7 +618,8 @@
   transform: translateX(-50%);
   color: rgba(255, 255, 255, 0.55);
   filter: drop-shadow(0 0 6px rgba(160, 190, 255, 0.45));
-  animation: scroll-hint-bounce 2.4s ease-in-out infinite;
+  /* 入场淡入后，再接循环弹跳 */
+  animation: hp-fadein 0.6s 2.1s ease both, scroll-hint-bounce 2.4s 2.7s ease-in-out infinite;
   cursor: pointer;
   transition: color 200ms ease, filter 200ms ease;
   z-index: 2;
@@ -640,7 +641,7 @@
     animation: none;
   }
   .home-scroll-hint {
-    animation: none;
+    animation: scroll-hint-bounce 2.4s ease-in-out infinite;
     opacity: 0.55;
   }
 }
@@ -1698,6 +1699,195 @@
 
   .home-hero__meta-item strong {
     font-size: 1rem;
+  }
+}
+
+/* ============================================================
+   HOME PAGE ENTRANCE ANIMATIONS
+   首页模块入场动画 — 纯 CSS keyframe，不改任何审美 token
+   ============================================================ */
+
+@keyframes hp-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* 文字逐行显现：blur 从模糊到清晰 + 轻微上移，产生「打字」节奏感 */
+@keyframes hp-text-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+/* 卡片块：scale + Y，「顺序加载」感 */
+@keyframes hp-fadein-card {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 背景层：慢淡入，先铺环境氛围 */
+.home-root-shell .bgfx {
+  animation: hp-fadein 1.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* ── Hero 文字区：逐元素 stagger，模拟从上到下逐行「打出」的节奏 ── */
+
+/* 整块容器不设动画，由子元素各自出现 */
+.home-hero--portal .home-hero__content {
+  animation: none;
+}
+
+.home-hero--portal .home-hero__tag {
+  animation: hp-text-reveal 0.55s 0.15s ease-out both;
+}
+
+.home-hero--portal .home-hero__title {
+  animation: hp-text-reveal 0.6s 0.38s ease-out both;
+}
+
+.home-hero--portal .home-hero__subtitle {
+  animation: hp-text-reveal 0.58s 0.62s ease-out both;
+}
+
+.home-hero--portal .home-hero__typewriter {
+  animation: hp-text-reveal 0.5s 0.85s ease-out both;
+}
+
+.home-hero--portal .home-hero__badges {
+  animation: hp-text-reveal 0.5s 1.08s ease-out both;
+}
+
+.home-hero--portal .home-hero__actions {
+  animation: hp-text-reveal 0.5s 1.30s ease-out both;
+}
+
+/* SYS STATUS 卡片：等文字基本落定后顺序加载 */
+.home-hero--portal .home-hero__panel {
+  animation: hp-fadein-card 0.9s 1.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Reduced motion：取消所有首页入场，元素直接可见 */
+@media (prefers-reduced-motion: reduce) {
+  .home-root-shell .bgfx,
+  .home-hero--portal .home-hero__tag,
+  .home-hero--portal .home-hero__title,
+  .home-hero--portal .home-hero__subtitle,
+  .home-hero--portal .home-hero__typewriter,
+  .home-hero--portal .home-hero__badges,
+  .home-hero--portal .home-hero__actions,
+  .home-hero--portal .home-hero__panel {
+    animation: none !important;
+  }
+}
+
+/* ============================================================
+   SUB-PAGE ENTRANCE ANIMATIONS
+   子页面入场动画 — 与首页同族但各有特色，不互相照抄
+   注：home-tool-card / home-latest-item 在首页内嵌于
+       home-reveal-section(opacity:0)，动画在不可见时完成，
+       scroll reveal 接管后无视觉冲突
+   ============================================================ */
+
+/* ── keyframes ── */
+
+/* 页头卡片：从上方轻落（方向与首页文字向上相反，强化「进入」感） */
+@keyframes sp-header-drop {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 卡片/列表项升起：无 blur，比首页更干脆直接 */
+@keyframes sp-item-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* About 段落块：从左侧滑入，唯一的横向入场 */
+@keyframes sp-block-emerge {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* 摄影图片：纯淡入，无位移（图片需要「就位感」，像底片曝光） */
+@keyframes sp-photo-develop {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── 共用：所有含 secondary-header 的子页面 header 卡片 ── */
+.secondary-header__card {
+  animation: sp-header-drop 0.65s 0.08s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── 文章详情：正文 surface 整体一次性升起，不拆散内容 ── */
+.post-body__surface {
+  animation: sp-item-rise 0.75s 0.12s ease-out both;
+}
+
+/* ── Tools 页 & 首页工具区：工具卡片依次升起 ── */
+.home-tool-card:nth-child(1) { animation: sp-item-rise 0.48s 0.24s ease-out both; }
+.home-tool-card:nth-child(2) { animation: sp-item-rise 0.48s 0.33s ease-out both; }
+.home-tool-card:nth-child(3) { animation: sp-item-rise 0.48s 0.42s ease-out both; }
+.home-tool-card:nth-child(4) { animation: sp-item-rise 0.48s 0.51s ease-out both; }
+.home-tool-card:nth-child(5) { animation: sp-item-rise 0.48s 0.60s ease-out both; }
+.home-tool-card:nth-child(6) { animation: sp-item-rise 0.48s 0.69s ease-out both; }
+.home-tool-card:nth-child(n+7) { animation: sp-item-rise 0.48s 0.75s ease-out both; }
+
+/* ── Tool 详情页：表单卡与预览卡先后出现 ── */
+.tool-form-card    { animation: sp-item-rise 0.5s 0.28s ease-out both; }
+.tool-preview-card { animation: sp-item-rise 0.5s 0.42s ease-out both; }
+
+/* ── About 页：段落块从左侧依次滑入 ── */
+.about-block:nth-child(1) { animation: sp-block-emerge 0.6s 0.24s ease-out both; }
+.about-block:nth-child(2) { animation: sp-block-emerge 0.6s 0.38s ease-out both; }
+.about-block:nth-child(3) { animation: sp-block-emerge 0.6s 0.52s ease-out both; }
+.about-block:nth-child(4) { animation: sp-block-emerge 0.6s 0.66s ease-out both; }
+.about-block:nth-child(5) { animation: sp-block-emerge 0.6s 0.80s ease-out both; }
+.about-block:nth-child(n+6) { animation: sp-block-emerge 0.6s 0.90s ease-out both; }
+
+/* ── Wandering 页：碎片列表项依次升起，节奏稍慢于 Tools ── */
+.home-latest-item:nth-child(1) { animation: sp-item-rise 0.52s 0.26s ease-out both; }
+.home-latest-item:nth-child(2) { animation: sp-item-rise 0.52s 0.36s ease-out both; }
+.home-latest-item:nth-child(3) { animation: sp-item-rise 0.52s 0.46s ease-out both; }
+.home-latest-item:nth-child(4) { animation: sp-item-rise 0.52s 0.56s ease-out both; }
+.home-latest-item:nth-child(5) { animation: sp-item-rise 0.52s 0.66s ease-out both; }
+.home-latest-item:nth-child(n+6) { animation: sp-item-rise 0.52s 0.74s ease-out both; }
+
+/* ── Photography 页：图片依次曝光，间隔均匀 ── */
+.photo-card:nth-child(1)   { animation: sp-photo-develop 0.5s 0.18s ease-out both; }
+.photo-card:nth-child(2)   { animation: sp-photo-develop 0.5s 0.27s ease-out both; }
+.photo-card:nth-child(3)   { animation: sp-photo-develop 0.5s 0.36s ease-out both; }
+.photo-card:nth-child(4)   { animation: sp-photo-develop 0.5s 0.45s ease-out both; }
+.photo-card:nth-child(5)   { animation: sp-photo-develop 0.5s 0.54s ease-out both; }
+.photo-card:nth-child(6)   { animation: sp-photo-develop 0.5s 0.63s ease-out both; }
+.photo-card:nth-child(7)   { animation: sp-photo-develop 0.5s 0.72s ease-out both; }
+.photo-card:nth-child(8)   { animation: sp-photo-develop 0.5s 0.81s ease-out both; }
+.photo-card:nth-child(n+9) { animation: sp-photo-develop 0.5s 0.88s ease-out both; }
+
+/* ── Reduced motion：取消所有子页面入场 ── */
+@media (prefers-reduced-motion: reduce) {
+  .secondary-header__card,
+  .post-body__surface,
+  .home-tool-card,
+  .tool-form-card,
+  .tool-preview-card,
+  .about-block,
+  .home-latest-item,
+  .photo-card {
+    animation: none !important;
   }
 }
 
