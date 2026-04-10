@@ -89,9 +89,10 @@ export const About: GlobalConfig = {
     {
       name: 'notes',
       type: 'array',
+      label: '碎碎念列表',
       minRows: 1,
       admin: {
-        description: '每条一句话，想加就加一行，想删就删。',
+        description: '每条一句话，想加就加一行，想删就删。输入内容后折叠标签会自动显示内容预览。',
         components: {
           RowLabel: '@/About/RowLabel#RowLabel',
         },
@@ -100,9 +101,11 @@ export const About: GlobalConfig = {
         {
           name: 'text',
           type: 'text',
+          label: '内容',
           required: true,
           admin: {
-            description: '一条碎碎念。',
+            description: '一条碎碎念，一句话即可。',
+            placeholder: '在这里输入内容…',
           },
         },
       ],
