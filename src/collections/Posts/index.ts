@@ -27,6 +27,7 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'payload'
 import { SECTION_OPTIONS } from '@/constants/sections'
+import { slugify } from '@/utilities/slugify'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -270,9 +271,10 @@ export const Posts: CollectionConfig<'posts'> = {
       ],
     },
     slugField({
+      slugify,
       overrides: {
         admin: {
-          description: 'URL 路径标识符，由标题自动生成（如「我的文章」→「my-article」）。发布后尽量不要修改，否则原链接会失效。',
+          description: 'URL 路径标识符，由标题自动生成（中文标题会转为拼音，如「深度思考」→「shen-du-si-kao」）。发布后尽量不要修改，否则原链接会失效。',
         },
       },
     }),
