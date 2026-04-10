@@ -3,7 +3,6 @@ import { HeadingNode, QuoteNode } from '@lexical/rich-text'
 import { ListNode, ListItemNode } from '@lexical/list'
 import { CodeNode, CodeHighlightNode } from '@lexical/code'
 import { LinkNode, AutoLinkNode } from '@lexical/link'
-import { HorizontalRuleNode } from '@lexical/react/LexicalHorizontalRuleNode'
 import { $convertFromMarkdownString, TRANSFORMERS } from '@lexical/markdown'
 
 export async function POST(req: Request) {
@@ -23,7 +22,6 @@ export async function POST(req: Request) {
         CodeHighlightNode,
         LinkNode,
         AutoLinkNode,
-        HorizontalRuleNode,
       ],
     })
 
