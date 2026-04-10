@@ -190,23 +190,23 @@ export default async function HomePage() {
       <div className="home-content-surface">
 
         {/* 深度思考区块 */}
-        <section className="home-reveal-section container mt-16">
-          <div className="home-section-head mb-8">
+        <section className="home-reveal-section container mt-14 md:mt-16">
+          <div className="home-section-head mb-6 md:mb-8">
             <h2 className="home-section-title">深度思考 / Blog</h2>
             <Link className="home-inline-link" href="/posts">查看全部 →</Link>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
             {/* 左侧：精选大卡片 */}
             <div className="lg:col-span-2 space-y-6">
               {featuredPosts.map((post) => (
                 <Link key={post.id} href={`/posts/${post.slug}`} className="block group">
-                  <article className="home-latest-item p-8 h-full">
+                  <article className="home-latest-item p-5 md:p-8 h-full">
                     <p className="home-latest-item__meta mb-4">FEATURED · {post.section || 'TECH'}</p>
-                    <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors">
+                    <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 group-hover:text-primary transition-colors">
                       {post.title}
                     </h3>
-                    <p className="text-muted-foreground line-clamp-2 mb-6">
+                    <p className="text-muted-foreground line-clamp-2 mb-5 md:mb-6">
                       {post.excerpt || post.meta?.description || '点击阅读全文...'}
                     </p>
                     <div className="text-sm font-medium text-primary/80">READ ARTICLE</div>
@@ -221,7 +221,7 @@ export default async function HomePage() {
               {latestPosts.map((post) => (
                 <Link key={post.id} href={`/posts/${post.slug}`} className="block group">
                   <article className="home-latest-item p-5">
-                    <p className="text-[0.7rem] text-muted-foreground mb-1">
+                    <p className="text-xs text-muted-foreground mb-1">
                       {post.publishedAt ? formatDateTime(post.publishedAt) : 'RECENT'}
                     </p>
                     <h4 className="font-semibold group-hover:text-primary transition-colors line-clamp-1">
@@ -242,7 +242,7 @@ export default async function HomePage() {
                       <Link key={f.id} href="/wandering" className="block group">
                         <article className="home-latest-item p-4">
                           {f.publishedAt && (
-                            <p className="text-[0.65rem] text-muted-foreground mb-1">{formatDateTime(f.publishedAt)}</p>
+                            <p className="text-[0.72rem] text-muted-foreground mb-1">{formatDateTime(f.publishedAt)}</p>
                           )}
                           <h4 className="text-sm font-semibold group-hover:text-primary transition-colors line-clamp-1">{f.title}</h4>
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{f.content}</p>
@@ -288,9 +288,9 @@ export default async function HomePage() {
         </section>
 
         {/* 底部聚合：关于与建设 */}
-        <section className="home-reveal-section container mt-24 mb-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="home-about-brief p-8">
+        <section className="home-reveal-section container mt-20 md:mt-24 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div className="home-about-brief p-5 md:p-8">
               <h2 className="text-xl font-bold mb-4">About · 一点人味</h2>
               <p className="text-muted-foreground leading-relaxed">
                 我在这里记录工程实践，也保留生活与表达。这个站不是成品展示，而是一段持续更新的建设过程。
@@ -302,7 +302,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="construction-card p-8 flex flex-col justify-between">
+            <div className="construction-card p-5 md:p-8 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">
                   <span className="construction-card__tag">PHASE 07</span>
