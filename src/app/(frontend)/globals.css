@@ -1719,6 +1719,13 @@ html[data-theme='light'] {
    DYNAMIC ISLAND VISUAL SYSTEM v12 - THE LIQUID FLOW
    ============================================================ */
 
+/* 注册为可动画自定义属性，允许 CSS transition 平滑插值 */
+@property --island-w {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 1200px;
+}
+
 .site-header {
   position: fixed;
   top: 0;
@@ -1743,7 +1750,8 @@ html[data-theme='light'] {
   /* 关键：始终居中对齐，靠内部的 flex-grow 撑开布局 */
   justify-content: center;
   width: 95%;
-  max-width: 1200px;
+  /* JS 通过 --island-w 动态设置目标宽度，@property 使其可平滑插值 */
+  max-width: min(var(--island-w), 95vw);
   min-height: 4.5rem;
   padding: 0 1.5rem;
   background: transparent;
@@ -1751,7 +1759,7 @@ html[data-theme='light'] {
   border-radius: 30px;
   /* 极长且平滑的过渡 */
   transition:
-    max-width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    --island-w 1.4s cubic-bezier(0.2, 0.8, 0.2, 1),
     min-height 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
     padding 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
     background 1.0s ease,
@@ -1763,8 +1771,7 @@ html[data-theme='light'] {
 }
 
 .site-header[data-scrolled="true"] .site-header__inner {
-  /* width 保持 95% 不变，只收缩 max-width（数值→数值，可插值） */
-  max-width: min(740px, 92vw);
+  /* max-width 由 JS 动态测量写入 --island-w，不再写死 */
   min-height: 3.6rem;
   padding: 0.35rem 1rem;
   background: rgba(10, 12, 22, 0.5);

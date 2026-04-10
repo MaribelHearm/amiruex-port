@@ -2,7 +2,7 @@
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { Header } from '@/payload-types'
 import type { PayloadMeUser } from '@payloadcms/admin-bar'
@@ -23,6 +23,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, preview }) => 
   const pathname = usePathname()
   const [isScrolled, setIsScrolled] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const innerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const threshold = pathname === '/' ? 240 : 120
@@ -41,6 +42,22 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, preview }) => 
     if (headerTheme && headerTheme !== theme) setTheme(headerTheme)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headerTheme])
+
+  // 动态测量 nav 宽度，写入 --island-w 驱动收缩动画
+  useEffect(() => {
+    const inner = innerRef.current
+    if (!inner) return
+    if (isScrolled) {
+      const nav = inner.querySelector('.site-nav') as HTMLElement | null
+      if (nav) {
+        // scrollWidth 反映 CSS 应用后的最终布局宽度（已计算新 gap/padding）
+        const targetW = nav.scrollWidth + 32 // 32px = 两侧 1rem padding
+        inner.style.setProperty('--island-w', `${targetW}px`)
+      }
+    } else {
+      inner.style.setProperty('--island-w', '1200px')
+    }
+  }, [isScrolled])
 
   const onAuthChange = useCallback((user: PayloadMeUser) => {
     setIsLoggedIn(Boolean(user?.id))
@@ -62,7 +79,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, preview }) => 
         />
       </div>
 
-      <div className="site-header__inner">
+      <div className="site-header__inner" ref={innerRef}>
         <Link href="/" className="site-header__logo-container">
           <Logo loading="eager" priority="high" className="site-header__logo" />
         </Link>
