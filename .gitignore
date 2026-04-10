@@ -18,5 +18,9 @@ public/sitemap*.xml
 node_modules/
 /test-results/
 /playwright-report/
+
+# Windows Turbopack bug — NUL is a reserved device name on Windows
+NUL
+tsconfig.tsbuildinfo
 /blob-report/
 /playwright/.cache/
