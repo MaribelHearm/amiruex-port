@@ -543,6 +543,29 @@
   margin-right: 0.3em;
 }
 
+/* ── Thinking 阶段：* Thinking... 风格 ── */
+
+/* `*` 符号：Tokyo Night 玫紫，与站点主渐变呼应 */
+.home-hero__thinking-star {
+  color: oklch(68% 0.24 320deg);
+  font-weight: 600;
+  margin-right: 0.18em;
+}
+
+/* "Thinking" 文字：italic 低饱和蓝灰，dim 感 */
+.home-hero__thinking-label {
+  font-style: italic;
+  color: oklch(56% 0.05 270deg);
+}
+
+/* 动态省略号：min-width 防止布局抖动 */
+.home-hero__thinking-dots {
+  display: inline-block;
+  min-width: 1.6em;
+  color: oklch(52% 0.05 270deg);
+  letter-spacing: 0.05em;
+}
+
 /* 块状光标：全亮 */
 .home-hero__typewriter-cursor {
   display: inline-block;
