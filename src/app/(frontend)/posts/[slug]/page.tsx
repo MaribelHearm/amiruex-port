@@ -52,9 +52,12 @@ export default async function Post({ params: paramsPromise }: Args) {
 
   if (!post) return <PayloadRedirects url={url} />
 
+  const hasHeroImage = post.heroImage && typeof post.heroImage !== 'string'
+
   return (
     <main className="home-root-shell">
-      <BackgroundFX />
+      {/* 有 Hero Image 时由 PostHero 的层 B 充当背景，不用 BackgroundFX */}
+      {!hasHeroImage && <BackgroundFX />}
       <PageClient />
 
       {/* Allows redirects for valid pages too */}
@@ -65,12 +68,15 @@ export default async function Post({ params: paramsPromise }: Args) {
       <PostHero post={post} />
 
       <div className="post-body container -mt-8 relative" style={{ zIndex: 1 }}>
-        <div className="post-body__surface max-w-[48rem] mx-auto">
-          <RichText data={post.content} enableGutter={false} enableProse />
+        {/* 卡片：72rem，内部 prose 限宽 52rem 保证阅读舒适 */}
+        <div className="post-body__surface max-w-[72rem] mx-auto">
+          <div className="max-w-[52rem] mx-auto">
+            <RichText data={post.content} enableGutter={false} enableProse />
+          </div>
         </div>
         {post.relatedPosts && post.relatedPosts.length > 0 && (
           <RelatedPosts
-            className="mt-12 max-w-[52rem] mx-auto"
+            className="mt-12 max-w-[72rem] mx-auto"
             docs={post.relatedPosts.filter((post) => typeof post === 'object')}
           />
         )}

@@ -1,7 +1,7 @@
 'use client'
 
 import { formatDateTime } from 'src/utilities/formatDateTime'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import type { Post } from '@/payload-types'
 
@@ -59,59 +59,91 @@ export const PostHero: React.FC<{
   post: Post
 }> = ({ post }) => {
   const { heroImage } = post
-
-  const [overlayOpacity, setOverlayOpacity] = useState(1)
+  const heroRef = useRef<HTMLDivElement>(null)
+  // 0 = 初始状态（层A全显）, 1 = 完全切换（层B全显）
+  const [progress, setProgress] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => {
-      // 在前 40vh 内完成淡出
-      const threshold = window.innerHeight * 0.4
-      setOverlayOpacity(Math.max(0, 1 - window.scrollY / threshold))
+      if (!heroRef.current) return
+      // 在 Hero 区 60% 高度内完成 crossfade
+      const threshold = heroRef.current.offsetHeight * 0.6
+      setProgress(Math.min(1, Math.max(0, window.scrollY / threshold)))
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  /* ── 有 Hero 图：沉浸式 header，底部遮罩随滚动消失 ── */
+  /* ── 有 Hero 图：双层 crossfade ── */
   if (heroImage && typeof heroImage !== 'string') {
     return (
-      <div className="relative -mt-[10.4rem] flex items-end min-h-[80vh] overflow-hidden" style={{ zIndex: 1 }}>
-        {/* 图片：正常填充，z-index 高于 BackgroundFX（fixed z-index:0） */}
-        <Media fill priority imgClassName="object-cover" resource={heroImage} />
-
-        {/* 顶部轻薄遮罩：让 Header 区域文字可读，不随滚动消失 */}
+      <>
+        {/* 层 B：position:fixed 全屏背景，随滚动淡入 */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          aria-hidden
           style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 40%)',
-            zIndex: 1,
+            position: 'fixed',
+            inset: 0,
+            zIndex: 0,
+            opacity: progress,
+            pointerEvents: 'none',
           }}
-        />
+        >
+          <Media fill imgClassName="object-cover" resource={heroImage} />
+          {/* 轻薄暗色遮罩，让毛玻璃后面不过曝 */}
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.28)' }} />
+        </div>
 
-        {/* 底部地平线渐变：随滚动淡出 */}
+        {/* 层 A：PostHero section，随滚动淡出 */}
         <div
-          className="absolute bottom-0 left-0 right-0 pointer-events-none"
-          style={{
-            height: '52%',
-            opacity: overlayOpacity,
-            background: [
-              'linear-gradient(to top,',
-              '  var(--background) 8%,',
-              '  color-mix(in oklch, var(--background) 55%, transparent) 40%,',
-              '  color-mix(in oklch, var(--background) 18%, transparent) 70%,',
-              '  transparent 100%)',
-            ].join(' '),
-            zIndex: 1,
-          }}
-        />
+          ref={heroRef}
+          className="post-hero-entrance relative -mt-[10.4rem] flex items-end min-h-[80vh] overflow-hidden"
+          style={{ zIndex: 1 }}
+        >
+          {/* 图片层，opacity 随 progress 淡出 */}
+          <div
+            style={{ position: 'absolute', inset: 0, opacity: 1 - progress }}
+          >
+            <Media fill priority imgClassName="object-cover" resource={heroImage} />
+          </div>
 
-        {/* 文字信息：底部，叠在渐变之上 */}
-        <div className="container pb-14 relative" style={{ zIndex: 2 }}>
-          <div className="max-w-[48rem] mx-auto">
-            <PostMeta post={post} />
+          {/* 顶部阅读遮罩：固定，不参与 crossfade */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 40%)',
+              zIndex: 1,
+            }}
+          />
+
+          {/* 底部地平线渐变，随 progress 淡出 */}
+          <div
+            className="absolute bottom-0 left-0 right-0 pointer-events-none"
+            style={{
+              height: '52%',
+              opacity: 1 - progress,
+              background: [
+                'linear-gradient(to top,',
+                '  var(--background) 8%,',
+                '  color-mix(in oklch, var(--background) 55%, transparent) 40%,',
+                '  color-mix(in oklch, var(--background) 18%, transparent) 70%,',
+                '  transparent 100%)',
+              ].join(' '),
+              zIndex: 1,
+            }}
+          />
+
+          {/* 文字：随层 A 一起淡出 */}
+          <div
+            className="container pb-14 relative"
+            style={{ zIndex: 2, opacity: 1 - progress * 1.4 }}
+          >
+            <div className="max-w-[48rem] mx-auto">
+              <PostMeta post={post} />
+            </div>
           </div>
         </div>
-      </div>
+      </>
     )
   }
 
