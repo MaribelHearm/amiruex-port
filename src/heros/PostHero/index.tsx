@@ -78,7 +78,8 @@ export const PostHero: React.FC<{
   if (heroImage && typeof heroImage !== 'string') {
     return (
       <>
-        {/* 层 B：position:fixed 全屏背景，随滚动淡入 */}
+        {/* 层 B：position:fixed 全屏背景，随滚动淡入
+            图片加 blur+brightness，让非阅读区和首页 BackgroundFX 一致 */}
         <div
           aria-hidden
           style={{
@@ -87,11 +88,18 @@ export const PostHero: React.FC<{
             zIndex: 0,
             opacity: progress,
             pointerEvents: 'none',
+            overflow: 'hidden', // 裁掉 blur 溢出边缘
           }}
         >
-          <Media fill imgClassName="object-cover" resource={heroImage} />
-          {/* 轻薄暗色遮罩，让毛玻璃后面不过曝 */}
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.28)' }} />
+          <Media fill imgClassName="post-hero-bg-img" resource={heroImage} />
+          {/* 渐变遮罩：顶部压暗供 Header 区使用，整体加深 */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0.1) 100%)',
+            }}
+          />
         </div>
 
         {/* 层 A：PostHero section，随滚动淡出 */}
