@@ -3,11 +3,37 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { createCommand, COMMAND_PRIORITY_NORMAL } from 'lexical'
-import { $convertFromMarkdownString, TRANSFORMERS, CODE } from '@lexical/markdown'
+import {
+  $convertFromMarkdownString,
+  BOLD_ITALIC_STAR,
+  BOLD_ITALIC_UNDERSCORE,
+  BOLD_STAR,
+  BOLD_UNDERSCORE,
+  INLINE_CODE,
+  ITALIC_STAR,
+  ITALIC_UNDERSCORE,
+  STRIKETHROUGH,
+  HEADING,
+  QUOTE,
+  LINK,
+} from '@lexical/markdown'
 
-// Payload 使用自己的 Block-based 代码实现，@lexical/code 的 CodeNode 未注册
-// 移除 CODE block transformer 避免 "Node CodeNode has not been registered" 错误
-const PAYLOAD_SAFE_TRANSFORMERS = TRANSFORMERS.filter((t) => t !== CODE)
+// 只使用 Payload Lexical 编辑器已注册节点所对应的 transformer
+// 排除：CODE（依赖 @lexical/code CodeNode）
+//       UNORDERED_LIST / ORDERED_LIST（依赖 @lexical/list ListItemNode）
+const PAYLOAD_SAFE_TRANSFORMERS = [
+  HEADING,
+  QUOTE,
+  BOLD_ITALIC_STAR,
+  BOLD_ITALIC_UNDERSCORE,
+  BOLD_STAR,
+  BOLD_UNDERSCORE,
+  ITALIC_STAR,
+  ITALIC_UNDERSCORE,
+  STRIKETHROUGH,
+  INLINE_CODE,
+  LINK,
+]
 
 export const OPEN_MARKDOWN_IMPORT_COMMAND = createCommand<void>('OPEN_MARKDOWN_IMPORT_COMMAND')
 
