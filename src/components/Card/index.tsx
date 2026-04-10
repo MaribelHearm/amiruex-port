@@ -8,7 +8,7 @@ import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 
-export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title' | 'heroImage'>
 
 export const Card: React.FC<{
   alignItems?: 'center'
@@ -21,8 +21,9 @@ export const Card: React.FC<{
   const { card, link } = useClickableCard({})
   const { className, doc, relationTo, showCategories, title: titleFromProps } = props
 
-  const { slug, categories, meta, title } = doc || {}
+  const { slug, categories, meta, title, heroImage } = doc || {}
   const { description, image: metaImage } = meta || {}
+  const coverImage = heroImage && typeof heroImage !== 'string' ? heroImage : (metaImage && typeof metaImage !== 'string' ? metaImage : null)
 
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
   const titleToUse = titleFromProps || title
@@ -38,9 +39,9 @@ export const Card: React.FC<{
       ref={card.ref}
     >
       <div className="relative w-full aspect-video overflow-hidden">
-        {metaImage && typeof metaImage !== 'string' ? (
+        {coverImage ? (
           <Media
-            resource={metaImage}
+            resource={coverImage}
             size="33vw"
             imgClassName="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
           />

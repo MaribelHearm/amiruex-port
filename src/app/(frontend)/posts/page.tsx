@@ -28,6 +28,7 @@ export default async function Page() {
       publishedAt: true,
       tags: true,
       categories: true,
+      heroImage: true,
       meta: true,
     },
   })
