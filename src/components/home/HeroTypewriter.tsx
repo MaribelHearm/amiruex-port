@@ -12,13 +12,13 @@ const PHRASES = [
 /** 星号循环帧：从简单到复杂再回来，营造旋转/脉动感 */
 const STAR_FRAMES = ['✦', '✧', '⊹', '✱', '✲', '✳', '✴', '✵', '✳', '✱', '⊹', '✧']
 
-const TYPE_SPEED    = 95
-const DELETE_SPEED  = 55
-const PAUSE_AFTER   = 2000
-const THINK_FIRST   = 2600   // 首次 thinking 有仪式感
-const THINK_REPEAT  = 1400   // 后续也不太短
-const DOT_TICK      = 400    // 省略号节奏
-const STAR_TICK     = 110    // 星号切换节奏，快一点有旋转感
+const TYPE_SPEED    = 140    // 打字速度，更从容
+const DELETE_SPEED  = 75     // 删除速度
+const PAUSE_AFTER   = 2800   // 展示停留更久
+const THINK_FIRST   = 4200   // 首次 thinking 仪式感更强
+const THINK_REPEAT  = 2400   // 后续 thinking 也不急
+const DOT_TICK      = 520    // 省略号更慢，像在沉思
+const STAR_TICK     = 200    // 星号切换慢一些，像轻微脉动
 
 type Phase = 'thinking' | 'typing' | 'paused' | 'deleting'
 

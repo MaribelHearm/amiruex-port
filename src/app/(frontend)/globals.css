@@ -552,10 +552,30 @@
   margin-right: 0.18em;
 }
 
-/* "Thinking" 文字：italic 低饱和蓝灰，dim 感 */
+/* 流动光效关键帧：光扫从右向左穿过文字 */
+@keyframes thinking-flow {
+  0%   { background-position: 200% center; }
+  100% { background-position: -100% center; }
+}
+
+/* "Thinking" 文字：italic + 流动光效，Tokyo Night 蓝紫扫光 */
 .home-hero__thinking-label {
   font-style: italic;
-  color: oklch(56% 0.05 270deg);
+  background: linear-gradient(
+    90deg,
+    oklch(52% 0.06 270deg) 0%,
+    oklch(52% 0.06 270deg) 20%,
+    oklch(84% 0.18 278deg) 48%,
+    oklch(76% 0.14 198deg) 56%,
+    oklch(52% 0.06 270deg) 75%,
+    oklch(52% 0.06 270deg) 100%
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: thinking-flow 3.6s linear infinite;
 }
 
 /* 动态省略号：min-width 防止布局抖动 */
