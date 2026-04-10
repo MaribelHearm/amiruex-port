@@ -119,12 +119,22 @@ export const Posts: CollectionConfig<'posts'> = {
       },
     },
     {
+      name: 'categories',
+      type: 'relationship',
+      hasMany: true,
+      relationTo: 'categories',
+      admin: {
+        position: 'sidebar',
+        description: '文章分类，从预设列表中选择。显示在 Hero 区标题上方。',
+      },
+    },
+    {
       name: 'tags',
       type: 'text',
       hasMany: true,
       admin: {
         position: 'sidebar',
-        description: '自由标签，输入后按回车添加。与分类（Categories）的区别：标签更灵活、扁平，分类是预设的层级体系。',
+        description: '自由标签，输入后按回车添加。比分类更灵活，不需要预先定义。',
       },
     },
     {
@@ -185,16 +195,6 @@ export const Posts: CollectionConfig<'posts'> = {
               },
               hasMany: true,
               relationTo: 'posts',
-            },
-            {
-              name: 'categories',
-              type: 'relationship',
-              admin: {
-                position: 'sidebar',
-                description: '文章分类，从预设列表中选择。显示在 Hero 区标题上方。与标签（Tags）的区别：分类是预定义的正式体系。',
-              },
-              hasMany: true,
-              relationTo: 'categories',
             },
           ],
           label: '关联设置',
