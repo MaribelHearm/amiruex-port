@@ -1508,11 +1508,6 @@
   color: var(--muted-foreground);
 }
 
-.wandering-shell {
-  background:
-    radial-gradient(circle at 10% 0%, oklch(97% 0.02 300deg) 0%, transparent 35%),
-    radial-gradient(circle at 88% 8%, oklch(96% 0.02 180deg) 0%, transparent 35%);
-}
 
 .wandering-hero {
   border: 1px solid var(--border);

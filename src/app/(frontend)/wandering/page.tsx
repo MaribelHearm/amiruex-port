@@ -1,68 +1,69 @@
 import type { Metadata } from 'next'
-
 import Link from 'next/link'
+import { BackgroundFX } from '@/components/BackgroundFX'
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
+import { formatDateTime } from '@/utilities/formatDateTime'
 
-const FRAGMENTS = [
-  {
-    title: '凌晨的构建日志',
-    content:
-      '今天把主站的导航、404、首页聚合做了统一，剩下的不是“再堆功能”，而是保持可持续的节奏。',
-    time: '2026-04-09',
-  },
-  {
-    title: '关于碎片区的意义',
-    content:
-      '不是每次都要写成完整长文。碎片区允许“半成品思考”先留下来，后续再沉淀成文章或工具。',
-    time: '2026-04-08',
-  },
-  {
-    title: '维护感受',
-    content:
-      '当页面、文案、状态表达统一之后，维护成本会明显下降，因为每次迭代都能复用已有决策。',
-    time: '2026-04-07',
-  },
-]
+export const revalidate = 600
 
 export function generateMetadata(): Metadata {
   return {
-    title: 'Wandering / 碎片区',
+    title: 'Wandering · 碎片区 | Amireux',
     description: '记录短想法、轻笔记与尚未展开的方向。',
   }
 }
 
-export default function WanderingPage() {
+export default async function WanderingPage() {
+  const payload = await getPayload({ config: configPromise })
+  const result = await payload.find({
+    collection: 'fragments',
+    draft: false,
+    limit: 50,
+    overrideAccess: false,
+    sort: '-publishedAt',
+    select: { title: true, content: true, publishedAt: true },
+  })
+  const fragments = result.docs
+
   return (
-    <main className="wandering-shell pt-16 pb-20">
-      <section className="container" aria-labelledby="wandering-title">
-        <div className="wandering-hero">
-          <p className="wandering-hero__tag">wandering / fragments</p>
-          <h1 id="wandering-title">Wandering · 碎片区</h1>
-          <p>
-            用来放短随笔、过程性想法和未完成线索。它不追求完整，而追求持续更新与可回看。
+    <main className="home-shell home-root-shell">
+      <BackgroundFX />
+
+      <section className="secondary-header container">
+        <div className="secondary-header__card">
+          <p className="secondary-header__tag">wandering / fragments</p>
+          <h1 className="secondary-header__title">Wandering · 碎片区</h1>
+          <p className="secondary-header__description">
+            用来放短随笔、过程性想法和未完成线索。不追求完整，追求持续更新与可回看。
           </p>
         </div>
       </section>
 
-      <section className="container mt-8" aria-labelledby="wandering-list-title">
-        <div className="home-section-head">
-          <h2 id="wandering-list-title" className="home-section-title">
-            最近碎片
-          </h2>
+      <div className="container pb-24">
+        <div className="home-section-head mb-6">
+          <h2 className="home-section-title">最近碎片</h2>
           <Link className="home-inline-link" href="/posts">
             去看完整文章
           </Link>
         </div>
 
-        <div className="wandering-list">
-          {FRAGMENTS.map((item) => (
-            <article key={item.title} className="wandering-card">
-              <p className="wandering-card__time">{item.time}</p>
-              <h3>{item.title}</h3>
-              <p>{item.content}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+        {fragments.length === 0 ? (
+          <p className="text-muted-foreground text-sm py-12 text-center">还没有碎片，去后台添加第一条吧。</p>
+        ) : (
+          <div className="wandering-list">
+            {fragments.map((item) => (
+              <article key={item.id} className="wandering-card">
+                {item.publishedAt && (
+                  <p className="wandering-card__time">{formatDateTime(item.publishedAt)}</p>
+                )}
+                <h3>{item.title}</h3>
+                <p>{item.content}</p>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
     </main>
   )
 }

@@ -7,6 +7,7 @@ import { zh } from 'payload/i18n/zh'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
+import { Fragments } from './collections/Fragments'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -63,7 +64,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URL,
   }),
-  collections: [Pages, Posts, Media, Categories, Users],
+  collections: [Pages, Posts, Media, Categories, Fragments, Users],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, About],
   plugins,
