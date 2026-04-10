@@ -131,6 +131,14 @@ export default async function HomePage() {
                 <Link className="home-btn home-btn--ghost" href="/about">
                   关于我
                 </Link>
+                <a
+                  className="home-btn home-btn--ghost"
+                  href="https://github.com/MaribelHearm"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  GitHub
+                </a>
               </div>
             </div>
 
@@ -290,7 +298,7 @@ export default async function HomePage() {
               </p>
               <div className="mt-8 flex gap-4">
                 <Link href="/about" className="text-sm font-bold text-primary hover:underline">了解更多</Link>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">GITHUB</a>
+                <a href="https://github.com/MaribelHearm" target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-muted-foreground hover:text-foreground transition-colors">GITHUB</a>
               </div>
             </div>
 
