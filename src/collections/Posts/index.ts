@@ -284,7 +284,10 @@ export const Posts: CollectionConfig<'posts'> = {
       ],
     },
     slugField({
-      slugify: ({ valueToSlugify }) => slugify(valueToSlugify ?? ''),
+      slugify: ({ valueToSlugify }) => {
+        if (!valueToSlugify?.trim()) return undefined
+        return slugify(valueToSlugify)
+      },
     }),
   ],
   hooks: {
@@ -295,7 +298,7 @@ export const Posts: CollectionConfig<'posts'> = {
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 2000,
       },
       schedulePublish: true,
     },

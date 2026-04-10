@@ -27,7 +27,10 @@ export const Categories: CollectionConfig = {
       required: true,
     },
     slugField({
-      slugify: ({ valueToSlugify }) => slugify(valueToSlugify ?? ''),
+      slugify: ({ valueToSlugify }) => {
+        if (!valueToSlugify?.trim()) return undefined
+        return slugify(valueToSlugify)
+      },
     }),
   ],
 }
