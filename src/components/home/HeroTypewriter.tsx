@@ -9,49 +9,57 @@ const PHRASES = [
   '探索滚动叙事新玩法',
 ]
 
-const TYPE_SPEED = 95
-const DELETE_SPEED = 55
-const PAUSE_AFTER = 2000
-/** 首次 thinking 久一点，更有仪式感 */
-const THINK_FIRST = 1600
-/** 后续 thinking 短一点，不让用户等 */
-const THINK_REPEAT = 750
-/** dots 切换间隔 */
-const DOT_TICK = 370
+/** 星号循环帧：从简单到复杂再回来，营造旋转/脉动感 */
+const STAR_FRAMES = ['✦', '✧', '⊹', '✱', '✲', '✳', '✴', '✵', '✳', '✱', '⊹', '✧']
+
+const TYPE_SPEED    = 95
+const DELETE_SPEED  = 55
+const PAUSE_AFTER   = 2000
+const THINK_FIRST   = 2600   // 首次 thinking 有仪式感
+const THINK_REPEAT  = 1400   // 后续也不太短
+const DOT_TICK      = 400    // 省略号节奏
+const STAR_TICK     = 110    // 星号切换节奏，快一点有旋转感
 
 type Phase = 'thinking' | 'typing' | 'paused' | 'deleting'
 
 export function HeroTypewriter() {
-  const [phase, setPhase] = useState<Phase>('thinking')
+  const [phase, setPhase]       = useState<Phase>('thinking')
   const [displayed, setDisplayed] = useState('')
   const [phraseIdx, setPhraseIdx] = useState(0)
   const [dotCount, setDotCount] = useState(0)
+  const [starIdx, setStarIdx]   = useState(0)
 
-  const mainTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const dotInterval = useRef<ReturnType<typeof setInterval> | null>(null)
+  const mainTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dotTimer    = useRef<ReturnType<typeof setInterval> | null>(null)
+  const starTimer   = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  // 点号动画：仅在 thinking 阶段运行
+  // 点号 + 星号动画：仅在 thinking 阶段运行
   useEffect(() => {
     if (phase === 'thinking') {
       setDotCount(0)
-      dotInterval.current = setInterval(() => {
+      setStarIdx(0)
+
+      dotTimer.current = setInterval(() => {
         setDotCount((d) => (d + 1) % 4)
       }, DOT_TICK)
+
+      starTimer.current = setInterval(() => {
+        setStarIdx((s) => (s + 1) % STAR_FRAMES.length)
+      }, STAR_TICK)
     } else {
-      if (dotInterval.current) {
-        clearInterval(dotInterval.current)
-        dotInterval.current = null
-      }
+      clearInterval(dotTimer.current ?? undefined)
+      clearInterval(starTimer.current ?? undefined)
+      dotTimer.current  = null
+      starTimer.current = null
     }
+
     return () => {
-      if (dotInterval.current) {
-        clearInterval(dotInterval.current)
-        dotInterval.current = null
-      }
+      clearInterval(dotTimer.current ?? undefined)
+      clearInterval(starTimer.current ?? undefined)
     }
   }, [phase])
 
-  // 主状态机：thinking → typing → paused → deleting → thinking …
+  // 主状态机
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setPhase('typing')
@@ -66,6 +74,7 @@ export function HeroTypewriter() {
     if (phase === 'thinking') {
       const duration = phraseIdx === 0 ? THINK_FIRST : THINK_REPEAT
       mainTimer.current = setTimeout(() => setPhase('typing'), duration)
+
     } else if (phase === 'typing') {
       const target = PHRASES[phraseIdx % PHRASES.length] ?? ''
       if (displayed.length < target.length) {
@@ -76,8 +85,10 @@ export function HeroTypewriter() {
       } else {
         setPhase('paused')
       }
+
     } else if (phase === 'paused') {
       mainTimer.current = setTimeout(() => setPhase('deleting'), PAUSE_AFTER)
+
     } else if (phase === 'deleting') {
       if (displayed.length > 0) {
         mainTimer.current = setTimeout(
@@ -93,12 +104,13 @@ export function HeroTypewriter() {
     return clear
   }, [phase, displayed, phraseIdx])
 
+  const star = STAR_FRAMES[starIdx] ?? '✦'
   const dots = '.'.repeat(dotCount)
 
   if (phase === 'thinking') {
     return (
       <p className="home-hero__typewriter" aria-live="polite" aria-label="正在思考">
-        <span className="home-hero__thinking-star">*</span>
+        <span className="home-hero__thinking-star">{star}</span>
         <span className="home-hero__thinking-label"> Thinking</span>
         <span className="home-hero__thinking-dots">{dots}</span>
       </p>
@@ -110,9 +122,7 @@ export function HeroTypewriter() {
       <span className="home-hero__typewriter-prefix">~/portal</span>
       <span className="home-hero__typewriter-sep"> $ </span>
       <span>{displayed}</span>
-      <span className="home-hero__typewriter-cursor" aria-hidden>
-        █
-      </span>
+      <span className="home-hero__typewriter-cursor" aria-hidden>█</span>
     </p>
   )
 }
