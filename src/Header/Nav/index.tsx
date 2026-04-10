@@ -7,14 +7,24 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
-import { SearchIcon, LayoutDashboard, ShieldCheck } from 'lucide-react'
+import { SearchIcon, LayoutDashboard, ShieldCheck, House } from 'lucide-react'
 
 export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
   const pathname = usePathname()
   const navItems = data?.navItems || []
+  const isHome = pathname === '/'
 
   return (
     <nav className="site-nav" aria-label="主导航">
+      {!isHome && (
+        <Link
+          href="/"
+          className="site-nav__home"
+          title="回到主页"
+        >
+          <House className="w-4 h-4" />
+        </Link>
+      )}
       <Link
         href="/posts"
         className={`site-nav__link${pathname?.startsWith('/posts') ? ' site-nav__link--active' : ''}`}

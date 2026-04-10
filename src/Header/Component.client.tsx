@@ -18,17 +18,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
   const pathname = usePathname()
-  // 子页面进入时立刻呈现岛屿态；首页等待滚过 Hero 区
-  const [isScrolled, setIsScrolled] = useState(pathname !== '/')
+  const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
-    if (pathname !== '/') {
-      // 子页面：始终保持岛屿态，不受滚动影响
-      setIsScrolled(true)
-      return
-    }
-    // 首页：滚过 Hero 区域（240px）才收缩
-    const handleScroll = () => setIsScrolled(window.scrollY > 240)
+    // 首页滚过 Hero（240px），子页面滚过 120px，均触发岛屿态
+    const threshold = pathname === '/' ? 240 : 120
+    const handleScroll = () => setIsScrolled(window.scrollY > threshold)
     window.addEventListener('scroll', handleScroll, { passive: true })
     handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)

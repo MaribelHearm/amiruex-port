@@ -1863,6 +1863,44 @@ html[data-theme='light'] {
   transform: scale(1.15);
 }
 
+/* 回主页按钮：仅在岛屿态可见，非岛屿态收起 */
+.site-nav__home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0;
+  height: 3.2rem;
+  border-radius: 18px;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 1px solid transparent;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.6s ease,
+    background 0.4s ease,
+    border-color 0.4s ease;
+}
+
+.site-header[data-scrolled="true"] .site-nav__home {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 24px;
+  opacity: 1;
+  pointer-events: auto;
+  background: color-mix(in oklab, var(--foreground) 3%, transparent);
+  border: 1px solid color-mix(in oklab, var(--foreground) 6%, transparent);
+}
+
+.site-header[data-scrolled="true"] .site-nav__home:hover {
+  background: color-mix(in oklab, var(--foreground) 10%, transparent);
+  border-color: color-mix(in oklab, var(--foreground) 18%, transparent);
+  color: var(--foreground);
+  transform: scale(1.15);
+}
+
 /* ─────────────────────────────────────────────────────────
    Logo 艺术字（site-logo-wordmark）
    渐变色文字：玫红 → 蓝紫 → 青，与站点主色调统一
