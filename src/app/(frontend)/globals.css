@@ -1863,6 +1863,26 @@ html[data-theme='light'] {
   transform: scale(1.15);
 }
 
+/* 登录后后台快捷入口：带主色高亮 */
+.site-nav__admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 24px;
+  color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 25%, transparent);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.site-nav__admin:hover {
+  background: color-mix(in oklab, var(--primary) 22%, transparent);
+  border-color: color-mix(in oklab, var(--primary) 45%, transparent);
+  transform: scale(1.1);
+}
+
 /* 回主页按钮：仅在岛屿态可见，非岛屿态收起 */
 .site-nav__home {
   display: inline-flex;

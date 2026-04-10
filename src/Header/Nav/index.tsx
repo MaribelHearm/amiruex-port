@@ -7,9 +7,9 @@ import type { Header as HeaderType } from '@/payload-types'
 
 import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
-import { SearchIcon, LayoutDashboard, ShieldCheck, House } from 'lucide-react'
+import { SearchIcon, LayoutDashboard, ShieldCheck, House, PenLine } from 'lucide-react'
 
-export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
+export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = ({ data, isLoggedIn }) => {
   const pathname = usePathname()
   const navItems = data?.navItems || []
   const isHome = pathname === '/'
@@ -68,14 +68,27 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
         <ShieldCheck className="w-4 h-4" />
       </Link>
 
-      {/* 管理后台 / 登录入口 */}
-      <Link
-        href="/admin"
-        className={`site-nav__link${pathname?.startsWith('/admin') ? ' site-nav__link--active' : ''}`}
-        title="管理后台 / 登录"
-      >
-        <LayoutDashboard className="w-4 h-4" />
-      </Link>
+      {/* 登录后：编辑快捷入口（替代黑色 AdminBar） */}
+      {isLoggedIn && (
+        <Link
+          href="/admin"
+          className="site-nav__admin"
+          title="进入后台"
+        >
+          <PenLine className="w-4 h-4" />
+        </Link>
+      )}
+
+      {/* 未登录时显示登录入口 */}
+      {!isLoggedIn && (
+        <Link
+          href="/admin"
+          className={`site-nav__link${pathname?.startsWith('/admin') ? ' site-nav__link--active' : ''}`}
+          title="登录"
+        >
+          <LayoutDashboard className="w-4 h-4" />
+        </Link>
+      )}
 
       <Link href="/search" className="site-nav__search" aria-label="搜索">
         <span className="sr-only">搜索</span>
