@@ -14,6 +14,7 @@ import { PostHero } from '@/heros/PostHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { BackgroundFX } from '@/components/BackgroundFX'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -52,7 +53,8 @@ export default async function Post({ params: paramsPromise }: Args) {
   if (!post) return <PayloadRedirects url={url} />
 
   return (
-    <article className="pt-16 pb-16">
+    <main className="home-root-shell">
+      <BackgroundFX />
       <PageClient />
 
       {/* Allows redirects for valid pages too */}
@@ -62,18 +64,18 @@ export default async function Post({ params: paramsPromise }: Args) {
 
       <PostHero post={post} />
 
-      <div className="flex flex-col items-center gap-4 pt-8">
-        <div className="container">
-          <RichText className="max-w-[48rem] mx-auto" data={post.content} enableGutter={false} />
-          {post.relatedPosts && post.relatedPosts.length > 0 && (
-            <RelatedPosts
-              className="mt-12 max-w-[52rem] lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
-              docs={post.relatedPosts.filter((post) => typeof post === 'object')}
-            />
-          )}
+      <div className="post-body container">
+        <div className="post-body__surface max-w-[48rem] mx-auto">
+          <RichText data={post.content} enableGutter={false} enableProse />
         </div>
+        {post.relatedPosts && post.relatedPosts.length > 0 && (
+          <RelatedPosts
+            className="mt-12 max-w-[52rem] mx-auto"
+            docs={post.relatedPosts.filter((post) => typeof post === 'object')}
+          />
+        )}
       </div>
-    </article>
+    </main>
   )
 }
 

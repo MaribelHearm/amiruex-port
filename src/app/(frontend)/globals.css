@@ -399,6 +399,39 @@
   /* Removed border, background, and padding to make it a transparent container */
 }
 
+/* ── 文章正文区域 surface ──
+   毛玻璃卡片，让正文在背景图上保持可读性 */
+.post-body {
+  padding-top: 2rem;
+  padding-bottom: 6rem;
+}
+
+.post-body__surface {
+  background: color-mix(in oklab, var(--background) 72%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  border-radius: 1rem;
+  padding: 2.5rem 2rem;
+}
+
+@variant md {
+  .post-body__surface {
+    padding: 3rem 3.5rem;
+  }
+}
+
+/* ── 无 Hero 图的文章头部 ── */
+.post-hero-text {
+  padding-top: 8rem;
+  padding-bottom: 3rem;
+}
+
+.post-hero-text__inner {
+  max-width: 48rem;
+  margin-inline: auto;
+}
+
 .home-hero--portal {
   position: relative;
   display: flex;
@@ -1655,7 +1688,6 @@ html[data-theme='light'] {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 30px;
-  /* overflow: hidden 已移除 —— 它会破坏 backdrop-filter 的模糊效果 */
   /* 极长且平滑的过渡 */
   transition:
     width 1.4s cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -1671,11 +1703,11 @@ html[data-theme='light'] {
 }
 
 .site-header[data-scrolled="true"] .site-header__inner {
-  width: 520px;
-  min-width: 420px;
+  width: auto;
+  min-width: 0;
   max-width: 90vw;
   min-height: 3.8rem;
-  padding: 0.4rem 1.2rem;
+  padding: 0.4rem 1rem;
   background: rgba(10, 12, 22, 0.5);
   /* Tailwind v4 PostCSS 会剥离 backdrop-filter，用 --tw-backdrop-blur 绕过 */
   --tw-backdrop-blur: blur(40px);
@@ -1732,13 +1764,14 @@ html[data-theme='light'] {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
   /* 导航本身的间距也参与演变 */
   transition: gap 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .site-header[data-scrolled="true"] .site-nav {
-  gap: 1.5rem;
+  gap: 0.25rem;
 }
 
 .site-nav__link {
@@ -1761,7 +1794,7 @@ html[data-theme='light'] {
 }
 
 .site-header[data-scrolled="true"] .site-nav__link {
-  padding: 0.5rem 1.4rem;
+  padding: 0.45rem 0.9rem;
   background: color-mix(in oklab, var(--foreground) 3%, transparent);
   border: 1px solid color-mix(in oklab, var(--foreground) 6%, transparent);
   border-radius: 24px;
