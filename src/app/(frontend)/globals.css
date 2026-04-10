@@ -428,10 +428,9 @@
   object-fit: cover;
   width: 100%;
   height: 100%;
-  /* 第一层模糊：先把图片细节抹掉，留下大色块
-     双重 blur 叠加后焦外光斑感更强烈 */
-  filter: blur(12px) brightness(0.62) saturate(1.3);
-  transform: scale(1.08); /* 防止 blur 边缘露白 */
+  /* 与首页 BackgroundFX 一致：轻微模糊 + 降亮 */
+  filter: blur(5px) brightness(0.75);
+  transform: scale(1.02);
 }
 
 /* ── 无 Hero 图的文章头部 ── */
