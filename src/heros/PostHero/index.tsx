@@ -37,18 +37,15 @@ const PostMeta: React.FC<{ post: Post; light?: boolean }> = ({ post, light }) =>
         {title}
       </h1>
 
-      <div className={`flex flex-col md:flex-row gap-4 md:gap-16 text-sm ${dimClass}`}>
+      <div className={`flex items-center gap-2 text-sm ${dimClass}`}>
         {hasAuthors && (
-          <div className="flex flex-col gap-1">
-            <p className="text-xs uppercase tracking-wider opacity-60">Author</p>
-            <p>{formatAuthors(populatedAuthors)}</p>
-          </div>
+          <span>{formatAuthors(populatedAuthors)}</span>
+        )}
+        {hasAuthors && publishedAt && (
+          <span className="opacity-40">·</span>
         )}
         {publishedAt && (
-          <div className="flex flex-col gap-1">
-            <p className="text-xs uppercase tracking-wider opacity-60">Date Published</p>
-            <time dateTime={publishedAt}>{formatDateTime(publishedAt)}</time>
-          </div>
+          <time dateTime={publishedAt}>{formatDateTime(publishedAt)}</time>
         )}
       </div>
     </>
@@ -124,29 +121,45 @@ export const PostHero: React.FC<{
             }}
           />
 
-          {/* 底部地平线渐变，随 progress 淡出 */}
+          {/* 底部三分之一遮罩：纯黑渐变，标题压在上面 */}
           <div
             className="absolute bottom-0 left-0 right-0 pointer-events-none"
             style={{
-              height: '52%',
+              height: '55%',
               opacity: 1 - progress,
               background: [
                 'linear-gradient(to top,',
-                '  var(--background) 8%,',
-                '  color-mix(in oklch, var(--background) 55%, transparent) 40%,',
-                '  color-mix(in oklch, var(--background) 18%, transparent) 70%,',
+                '  rgba(0,0,0,0.82) 0%,',
+                '  rgba(0,0,0,0.60) 25%,',
+                '  rgba(0,0,0,0.30) 55%,',
                 '  transparent 100%)',
               ].join(' '),
               zIndex: 1,
             }}
           />
 
-          {/* 文字：随层 A 一起淡出 */}
+          {/* 底部地平线（主题色渐变）：衔接正文卡片，随 progress 淡出 */}
           <div
-            className="container pb-14 relative"
-            style={{ zIndex: 2, opacity: 1 - progress * 1.4 }}
+            className="absolute bottom-0 left-0 right-0 pointer-events-none"
+            style={{
+              height: '22%',
+              opacity: 1 - progress,
+              background: [
+                'linear-gradient(to top,',
+                '  var(--background) 0%,',
+                '  color-mix(in oklch, var(--background) 60%, transparent) 50%,',
+                '  transparent 100%)',
+              ].join(' '),
+              zIndex: 2,
+            }}
+          />
+
+          {/* 文字：压在底部遮罩上，随层 A 一起淡出 */}
+          <div
+            className="container pb-10 relative"
+            style={{ zIndex: 3, opacity: 1 - progress * 1.4 }}
           >
-            <div className="max-w-[48rem] mx-auto">
+            <div className="max-w-[48rem]">
               <PostMeta post={post} />
             </div>
           </div>
