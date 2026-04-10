@@ -3,37 +3,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { createCommand, COMMAND_PRIORITY_NORMAL } from 'lexical'
-import {
-  $convertFromMarkdownString,
-  BOLD_ITALIC_STAR,
-  BOLD_ITALIC_UNDERSCORE,
-  BOLD_STAR,
-  BOLD_UNDERSCORE,
-  INLINE_CODE,
-  ITALIC_STAR,
-  ITALIC_UNDERSCORE,
-  STRIKETHROUGH,
-  HEADING,
-  QUOTE,
-  LINK,
-} from '@lexical/markdown'
-
-// 只使用 Payload Lexical 编辑器已注册节点所对应的 transformer
-// 排除：CODE（依赖 @lexical/code CodeNode）
-//       UNORDERED_LIST / ORDERED_LIST（依赖 @lexical/list ListItemNode）
-const PAYLOAD_SAFE_TRANSFORMERS = [
-  HEADING,
-  QUOTE,
-  BOLD_ITALIC_STAR,
-  BOLD_ITALIC_UNDERSCORE,
-  BOLD_STAR,
-  BOLD_UNDERSCORE,
-  ITALIC_STAR,
-  ITALIC_UNDERSCORE,
-  STRIKETHROUGH,
-  INLINE_CODE,
-  LINK,
-]
 
 export const OPEN_MARKDOWN_IMPORT_COMMAND = createCommand<void>('OPEN_MARKDOWN_IMPORT_COMMAND')
 
@@ -41,6 +10,8 @@ export function MarkdownImportPlugin() {
   const [editor] = useLexicalComposerContext()
   const [isOpen, setIsOpen] = useState(false)
   const [markdown, setMarkdown] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -59,16 +30,32 @@ export function MarkdownImportPlugin() {
       setTimeout(() => textareaRef.current?.focus(), 50)
     } else {
       setMarkdown('')
+      setError(null)
     }
   }, [isOpen])
 
-  const handleImport = useCallback(() => {
-    if (!markdown.trim()) return
-    editor.update(() => {
-      $convertFromMarkdownString(markdown, PAYLOAD_SAFE_TRANSFORMERS)
-    })
-    setIsOpen(false)
-  }, [editor, markdown])
+  const handleImport = useCallback(async () => {
+    if (!markdown.trim() || loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      const res = await fetch('/api/markdown-to-lexical', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markdown }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? '转换失败')
+
+      const state = editor.parseEditorState(data.lexical)
+      editor.setEditorState(state)
+      setIsOpen(false)
+    } catch (err) {
+      setError(String(err))
+    } finally {
+      setLoading(false)
+    }
+  }, [editor, markdown, loading])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -113,22 +100,14 @@ export function MarkdownImportPlugin() {
           </h3>
           <button
             onClick={() => setIsOpen(false)}
-            style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: 'var(--theme-text-muted, #888)',
-              fontSize: '18px',
-              lineHeight: 1,
-              padding: '4px',
-            }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--theme-text-muted, #888)', fontSize: '18px', lineHeight: 1, padding: '4px' }}
           >
             ×
           </button>
         </div>
 
         <p style={{ margin: 0, fontSize: '12px', color: 'var(--theme-text-muted, #888)' }}>
-          粘贴 Markdown 正文，点击导入后会替换当前编辑器内容。
+          粘贴 Markdown 正文，支持标题、列表、代码块、粗体、链接等。导入后会替换当前编辑器内容。
         </p>
 
         <textarea
@@ -136,7 +115,7 @@ export function MarkdownImportPlugin() {
           value={markdown}
           onChange={(e) => setMarkdown(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={'## 标题\n\n正文段落...\n\n```typescript\n// 代码块\n```'}
+          placeholder={'## 标题\n\n正文段落...\n\n- 列表项\n- 列表项\n\n```typescript\n// 代码块\n```'}
           style={{
             width: '100%',
             height: '320px',
@@ -153,36 +132,33 @@ export function MarkdownImportPlugin() {
           }}
         />
 
+        {error && (
+          <p style={{ margin: 0, fontSize: '12px', color: '#f87171' }}>{error}</p>
+        )}
+
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
           <button
             onClick={() => setIsOpen(false)}
-            style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid var(--theme-border-color, #333)',
-              background: 'transparent',
-              color: 'var(--theme-text-muted, #888)',
-              cursor: 'pointer',
-              fontSize: '13px',
-            }}
+            style={{ padding: '8px 16px', borderRadius: '6px', border: '1px solid var(--theme-border-color, #333)', background: 'transparent', color: 'var(--theme-text-muted, #888)', cursor: 'pointer', fontSize: '13px' }}
           >
             取消
           </button>
           <button
             onClick={handleImport}
-            disabled={!markdown.trim()}
+            disabled={!markdown.trim() || loading}
             style={{
               padding: '8px 16px',
               borderRadius: '6px',
               border: 'none',
-              background: markdown.trim() ? 'var(--theme-success, #3b82f6)' : '#333',
+              background: markdown.trim() && !loading ? 'var(--theme-success, #3b82f6)' : '#333',
               color: '#fff',
-              cursor: markdown.trim() ? 'pointer' : 'not-allowed',
+              cursor: markdown.trim() && !loading ? 'pointer' : 'not-allowed',
               fontSize: '13px',
               fontWeight: 600,
+              minWidth: '120px',
             }}
           >
-            导入（⌘ Enter）
+            {loading ? '转换中...' : '导入（⌘ Enter）'}
           </button>
         </div>
       </div>
