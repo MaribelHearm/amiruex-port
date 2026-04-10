@@ -1,6 +1,7 @@
 import type { Metadata } from 'next/types'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { CategoryFilter } from '@/components/CategoryFilter'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import { formatDateTime } from '@/utilities/formatDateTime'
@@ -16,22 +17,37 @@ export const revalidate = 600
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })
 
-  const posts = await payload.find({
-    collection: 'posts',
-    depth: 1,
-    limit: 12,
-    overrideAccess: false,
-    select: {
-      title: true,
-      slug: true,
-      excerpt: true,
-      publishedAt: true,
-      tags: true,
-      categories: true,
-      heroImage: true,
-      meta: true,
-    },
-  })
+  const [posts, categoriesResult] = await Promise.all([
+    payload.find({
+      collection: 'posts',
+      depth: 1,
+      limit: 12,
+      overrideAccess: false,
+      select: {
+        title: true,
+        slug: true,
+        excerpt: true,
+        publishedAt: true,
+        tags: true,
+        categories: true,
+        heroImage: true,
+        meta: true,
+      },
+    }),
+    payload.find({
+      collection: 'categories',
+      depth: 0,
+      limit: 100,
+      overrideAccess: false,
+      select: { title: true, slug: true },
+    }),
+  ])
+
+  const categories = categoriesResult.docs.map((c) => ({
+    id: String(c.id),
+    title: c.title,
+    slug: typeof c.slug === 'string' ? c.slug : '',
+  }))
 
   return (
     <main className="home-shell home-root-shell">
@@ -47,6 +63,12 @@ export default async function Page() {
           </p>
         </div>
       </section>
+
+      {categories.length > 0 && (
+        <div className="container mb-2">
+          <CategoryFilter categories={categories} />
+        </div>
+      )}
 
       <div className="container mb-8 flex justify-between items-center">
         <PageRange

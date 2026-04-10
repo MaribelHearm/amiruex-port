@@ -2064,3 +2064,37 @@ html[data-theme='light'] {
   line-height: 1.7;
   max-width: 52ch;
 }
+
+/* ── 分类筛选栏 ── */
+.posts-category-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 0 0.5rem;
+}
+
+.posts-category-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 1rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+  color: var(--muted-foreground);
+  background: color-mix(in oklab, var(--foreground) 3%, transparent);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.posts-category-pill:hover {
+  border-color: color-mix(in oklab, var(--foreground) 25%, transparent);
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+
+.posts-category-pill--active {
+  background: var(--foreground);
+  color: var(--background);
+  border-color: var(--foreground);
+}
