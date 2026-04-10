@@ -39,9 +39,10 @@ export default async function HomePage() {
 
   let latestPosts: LightweightPost[] = []
   let featuredPosts: LightweightPost[] = []
+  let recentFragments: { id: string; title?: string | null; content?: string | null; publishedAt?: string | null }[] = []
 
   try {
-    const [latestResult, featuredResult] = await Promise.all([
+    const [latestResult, featuredResult, fragmentsResult] = await Promise.all([
       payload.find({
         collection: 'posts',
         depth: 0,
@@ -55,23 +56,26 @@ export default async function HomePage() {
         limit: 2,
         overrideAccess: false,
         sort: '-publishedAt',
-        where: {
-          isFeatured: {
-            equals: true,
-          },
-        },
+        where: { isFeatured: { equals: true } },
+      }),
+      payload.find({
+        collection: 'fragments',
+        depth: 0,
+        limit: 3,
+        overrideAccess: false,
+        sort: '-publishedAt',
+        select: { title: true, content: true, publishedAt: true },
       }),
     ])
 
     latestPosts = latestResult.docs as LightweightPost[]
     featuredPosts = featuredResult.docs as LightweightPost[]
+    recentFragments = fragmentsResult.docs as typeof recentFragments
 
-    // 如果没有精选，就拿最新的前两个
     if (featuredPosts.length === 0) {
       featuredPosts = latestPosts.slice(0, 2)
       latestPosts = latestPosts.slice(2)
     } else {
-      // 确保最新列表中不包含精选列表里的文章
       const featuredIds = new Set(featuredPosts.map(p => p.id))
       latestPosts = latestPosts.filter(p => !featuredIds.has(p.id)).slice(0, 3)
     }
@@ -81,7 +85,6 @@ export default async function HomePage() {
   }
 
   const toolsAvailable = TOOL_ITEMS.filter((item) => item.status === 'available')
-  const wanderingModule = EXTENSION_MODULES.find(m => m.slug === 'wandering-fragments')
 
   return (
     <main className="home-shell home-root-shell">
@@ -219,14 +222,33 @@ export default async function HomePage() {
                   </article>
                 </Link>
               ))}
-              {wanderingModule && (
-                <Link href={wanderingModule.href || '#'} className="block mt-8">
-                  <div className="p-6 rounded-2xl border border-dashed border-white/10 hover:border-primary/40 transition-colors">
-                    <h4 className="text-sm font-bold mb-2">Wandering / 碎片区</h4>
-                    <p className="text-xs text-muted-foreground">记录那些不便成文的瞬时灵感与日常观察。</p>
+              {/* 碎片区预览 */}
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Wandering · 碎片</p>
+                  <Link href="/wandering" className="text-xs text-primary/70 hover:text-primary transition-colors">全部 →</Link>
+                </div>
+                {recentFragments.length > 0 ? (
+                  <div className="space-y-2">
+                    {recentFragments.map((f) => (
+                      <Link key={f.id} href="/wandering" className="block group">
+                        <article className="home-latest-item p-4">
+                          {f.publishedAt && (
+                            <p className="text-[0.65rem] text-muted-foreground mb-1">{formatDateTime(f.publishedAt)}</p>
+                          )}
+                          <h4 className="text-sm font-semibold group-hover:text-primary transition-colors line-clamp-1">{f.title}</h4>
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{f.content}</p>
+                        </article>
+                      </Link>
+                    ))}
                   </div>
-                </Link>
-              )}
+                ) : (
+                  <Link href="/wandering" className="block">
+                    <div className="p-5 rounded-2xl border border-dashed border-white/10 hover:border-primary/40 transition-colors">
+                      <p className="text-xs text-muted-foreground">记录那些不便成文的瞬时灵感与日常观察。</p>
+                    </div>
+                  </Link>
+                )}</div>
             </div>
           </div>
         </section>

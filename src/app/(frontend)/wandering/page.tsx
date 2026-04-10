@@ -51,14 +51,14 @@ export default async function WanderingPage() {
         {fragments.length === 0 ? (
           <p className="text-muted-foreground text-sm py-12 text-center">还没有碎片，去后台添加第一条吧。</p>
         ) : (
-          <div className="wandering-list">
+          <div className="space-y-3">
             {fragments.map((item) => (
-              <article key={item.id} className="wandering-card">
+              <article key={item.id} className="home-latest-item p-6">
                 {item.publishedAt && (
-                  <p className="wandering-card__time">{formatDateTime(item.publishedAt)}</p>
+                  <p className="text-xs text-muted-foreground mb-2">{formatDateTime(item.publishedAt)}</p>
                 )}
-                <h3>{item.title}</h3>
-                <p>{item.content}</p>
+                <h3 className="font-semibold mb-2 leading-snug">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.content}</p>
               </article>
             ))}
           </div>
