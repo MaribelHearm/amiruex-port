@@ -285,17 +285,6 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     slugField({
       slugify: ({ valueToSlugify }) => slugify(valueToSlugify ?? ''),
-      overrides: (field) => {
-        const slugTextField = (field.fields as any[])?.find((f) => f.name === 'slug')
-        if (slugTextField) {
-          slugTextField.admin = {
-            ...slugTextField.admin,
-            description:
-              'URL 路径标识符，由标题自动生成（中文标题会转为拼音，如「深度思考」→「shen-du-si-kao」）。发布后尽量不要修改，否则原链接会失效。',
-          }
-        }
-        return field
-      },
     }),
   ],
   hooks: {
