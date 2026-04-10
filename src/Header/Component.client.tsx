@@ -22,13 +22,15 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   const [isScrolled, setIsScrolled] = useState(pathname !== '/')
 
   useEffect(() => {
-    // 首页：滚过 Hero 区域（240px）才收缩；子页面：几乎立即收缩（10px）
-    const threshold = pathname === '/' ? 240 : 10
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > threshold)
+    if (pathname !== '/') {
+      // 子页面：始终保持岛屿态，不受滚动影响
+      setIsScrolled(true)
+      return
     }
+    // 首页：滚过 Hero 区域（240px）才收缩
+    const handleScroll = () => setIsScrolled(window.scrollY > 240)
     window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll() // 初始化检查
+    handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [pathname])
 
