@@ -1,77 +1,112 @@
-# Payload Website Template
+# Amireux Personal Portal — next-portal
 
-## Personal Portal Quick Notes（当前项目定制）
+> **v2 交付说明**（截止 2026-04-10）
 
-本仓库已按“六模块聚合站”做了第一版改造：
-
-- `Posts` 新增必填字段 `section`，用于将内容分流到 6 个模块。
-- 新增 4 个前台分区路由：
-  - `/aletheia-infra`
-  - `/coding-tools`
-  - `/guides-docs`
-  - `/visual-cos-craft`
-  - `/about`
-- 分区页面均从 `posts` 中按 `section` 自动筛选并展示。
-
-### 私有基础设施门户（Private Portal）
-
-**入口路由**：`GET /private/portal`
-
-- 源文件：[`src/app/(frontend)/private/portal/portal.html`](src/app/(frontend)/private/portal/portal.html)（不在 `public/`，不会被 Next.js 静态直接暴露）
-- 鉴权方式：复用 `payload.auth({ headers })`，未登录返回 HTTP 403 + 友好提示页，并引导跳转 `/admin`
-- 背景图：`/assets/backgrounds/2.png`（对应 `public/assets/backgrounds/2.png`）
-- **访问前提**：必须先在 `/admin` 以有效账号登录，Cookie 未失效时直接访问 `/private/portal` 即可
-- **安全说明**：不对外暴露文件路径，不建立任何公开链接，不被 sitemap/robots 索引
-
-**验收检查点**：
-1. 未登录时访问 `/private/portal` → 收到 403 + 提示跳转到 `/admin`
-2. 登录后访问 `/private/portal` → 正常渲染 Aletheia 服务导航面板
-3. 背景图正确加载（开发者工具中 `/assets/backgrounds/2.png` 返回 200）
-4. 内网/外网服务链接均可正常点击跳转
+个人数字门户，基于 Payload CMS 3.x + Next.js 15 App Router。连接工程、创作与生活。
 
 ---
 
-### Section 枚举
+## 已完成功能（两轮迭代汇总）
 
-- `home`
-- `aletheia-infra`
-- `coding-tools`
-- `guides-docs`
-- `visual-cos-craft`
-- `about`
+### 第一轮 — 基础框架搭建
 
-### 轻量验证与启动（推荐）
+| 功能 | 说明 |
+|------|------|
+| 六模块内容分区 | `Posts` 新增 `section` 字段，将内容分流到 6 个栏目；各分区路由从 `posts` 按 `section` 自动筛选 |
+| 分区路由 | `/aletheia-infra`、`/coding-tools`、`/guides-docs`、`/visual-cos-craft`、`/about`、`/posts`（blog 主页） |
+| 私有基础设施门户 | `/private/portal`，复用 `payload.auth()` 鉴权，未登录返回 403 并引导跳转 `/admin` |
+| 汉字 slug 支持 | 引入 `pinyin-pro`，为 Posts 和 Categories 集合生成拼音 slug，空标题时返回 `undefined` 避免唯一键冲突 |
 
-为避免本机卡顿或 OOM，先做数据库连通性验证，再按用途选择启动脚本：
+### 第二轮 — 内容生产与 Blog 体验
 
-1. 在项目根目录执行依赖安装（首次一次即可）
-   - `npm install`
-2. 验证数据库连接（会读取 `.env` 的 `DATABASE_URL`）
-   - `npm run db:ping`
-3. 仅在 `db:ping` 成功后再启动开发服务
-   - `npm run generate:types`
-   - 日常只看前台：`npm run dev:site`
-   - 需要进入后台管理：`npm run dev:admin`
-   - 兼容启动（默认）：`npm run dev:lite`
+| 功能 | 说明 |
+|------|------|
+| Dynamic Island 动态宽度 | 导航栏收缩为灵动岛后，宽度根据内部 `.site-nav` 实际 `scrollWidth` 自动计算，用 `@property --island-w`（`<length>` 类型）驱动 CSS transition |
+| Markdown 导入按钮 | Lexical 编辑器工具栏新增导入按钮，选取 Markdown 文本后 POST 至 `/next/markdown-to-lexical`，服务端转换为 Lexical JSON 后直接写入编辑器状态。支持：标题、有序/无序列表、引用块、加粗/斜体/删除线/行内代码、链接。**不支持代码块**（Payload 用自己的 `Code` Block 实现，与 `@lexical/code` 不兼容） |
+| Blog 分类系统 | Categories collection 已有；新增前台 `/posts` 和 `/posts/categories/[slug]` 页面的分类筛选 pills；分类标签显示在 Card 组件 |
+| 分类字段位置调整 | Categories 选择器移到始终可见的侧边栏（之前藏在”关联设置” tab 内） |
+| write-post 写作助手 | `~/.claude/commands/write-post.md`：Claude Code 技能 (`/write-post`)，输入主题后生成完整文章草稿，包含结构化字段（标题/摘要/栏目/标签）+ 正文 Markdown |
+| autosave 间隔调整 | 由 100ms 改为 2000ms，避免空 slug 在快速自动保存时触发唯一键约束错误导致黑屏 |
 
-脚本说明：
+---
 
-- `npm run db:ping`：5 秒超时的 Mongo 连通性检查，快速失败，不会长时间占用资源。
-- `npm run dev:site`：前台浏览优先（`--max-old-space-size=1024`），适合只访问 `/`、`/posts` 等页面。
-- `npm run dev:admin`：后台管理优先（`--max-old-space-size=2048`），适合访问 `/admin`。
-- `npm run dev:lite`：通用模式（`--max-old-space-size=1536`），用于常规开发。
+## 当前限制
 
-低内存机器建议：
+- **Markdown 导入不支持代码块**：Payload Lexical 使用自定义 `Code` Block，其节点类型与 `@lexical/code` 的 `CodeNode`/`CodeHighlightNode` 完全不同。导入含代码块的 Markdown 时，代码块会被忽略（其余内容正常）。需要代码块时，导入后在编辑器中手动添加 Code Block。
+- **分类不支持嵌套**：当前 Categories collection 为平铺结构，没有启用 `@payloadcms/plugin-nested-docs`。如有”一级 > 二级”分类需求需另外改造。
+- **搜索页暂无分类筛选**：`/search` 页面不包含分类 filter，只有全文搜索。
 
-- 先用 `npm run dev:site`，确认前台正常后再决定是否切 `npm run dev:admin`。
-- 避免启动后第一时间直接访问 `/admin`，先访问首页触发较轻量编译。
+---
 
-常见失败说明：
+## 计划 / 未来改进
 
-- `ECONNREFUSED 192.168.1.103:27017`：通常是内网 Mongo 服务未启动、端口未放通、容器未映射到宿主机，或本机到该 IP 的网络不可达。
-- `JavaScript heap out of memory`：优先改用 `npm run dev:site` 或 `npm run dev:admin`，避免在低堆内存下直接编译后台页面。
+- [ ] **标签（tags）前台筛选**：`/posts/tags/[tag]` 路由，与分类系统类似
+- [ ] **搜索页增强**：支持按分类/标签过滤，改善结果展示
+- [ ] **Wiki → Blog 批量迁移工具**（脚本）：遍历 Wiki.js 文章，通过 `/next/markdown-to-lexical` 转换后 POST 到 Payload API，输出导入报告
+- [ ] **代码块 Markdown 导入支持**：研究是否可以在 Lexical 编辑器中直接 dispatch 创建 Payload Code Block 的命令，实现完整 Markdown 导入
+- [ ] **写作助手增强**：支持从 Wiki.js API 直接拉取文章内容，进一步减少手动复制
 
-> `next build` / `next dev` 会在页面数据阶段访问数据库；数据库不可达时会直接报错。
+---
+
+## 私有基础设施门户
+
+**入口路由**：`GET /private/portal`
+
+- 源文件：`src/app/(frontend)/private/portal/portal.html`（不在 `public/`，不被 Next.js 静态直接暴露）
+- 鉴权：复用 `payload.auth({ headers })`，未登录返回 HTTP 403 + 提示页，引导跳转 `/admin`
+- **访问前提**：必须先在 `/admin` 登录，Cookie 有效时直接访问 `/private/portal` 即可
+- 不被 sitemap/robots 索引，不建立公开链接
+
+---
+
+## Section 枚举
+
+| 值 | 含义 |
+|----|------|
+| `home` | 首页聚合 |
+| `aletheia-infra` | 基础设施 / 工程实践 |
+| `coding-tools` | 编码 / 工具链 / 效率 |
+| `guides-docs` | 教程 / 文档 / 知识整理 |
+| `visual-cos-craft` | 视觉 / 摄影 / Cos / 手作 |
+| `about` | 随笔 / 碎碎念 |
+
+---
+
+## 本地开发
+
+为避免本机卡顿或 OOM，先做数据库连通性验证：
+
+```bash
+npm install
+npm run db:ping
+npm run generate:types
+```
+
+按用途选择启动脚本：
+
+| 脚本 | 用途 | 堆内存 |
+|------|------|--------|
+| `npm run dev:site` | 只看前台 | 1024 MB |
+| `npm run dev:admin` | 需要进后台 | 2048 MB |
+| `npm run dev:lite` | 常规开发 | 1536 MB |
+
+**建议**：先用 `dev:site` 确认前台，再按需切换。避免启动后立即访问 `/admin`（会触发更重的编译）。
+
+**常见错误**：
+- `ECONNREFUSED 192.168.1.103:27017`：内网 MongoDB 未启动或网络不可达
+- `JavaScript heap out of memory`：改用 `dev:site` 或 `dev:admin`，不要直接 `npm run dev`
+
+---
+
+## 云端部署说明
+
+本轮改动**不需要任何额外配置**即可直接推送部署：
+
+- 无新增环境变量
+- 无需手动数据库迁移（MongoDB + Payload `push: true` 会自动同步 schema）
+- 新功能均为代码层面改动（新文件、字段调整、组件新增）
+
+直接 push → CI/CD 构建 → 完成。
 
 ---
 

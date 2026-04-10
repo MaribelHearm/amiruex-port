@@ -1807,14 +1807,16 @@ html[data-theme='light'] {
   transition:
     flex 1.4s cubic-bezier(0.2, 0.8, 0.2, 1),
     opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    margin-right 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   overflow: hidden;
   margin-right: 1rem;
 }
 
 .site-header[data-scrolled="true"] .site-header__logo-container {
-  /* 岛屿态：flex-grow 变为 0，不再占据空间，Nav 自动回到容器中心 */
+  /* 岛屿态：flex-grow 变为 0，margin 也归零，确保 nav 完全居中 */
   flex: 0 0 0px;
+  margin-right: 0;
   opacity: 0;
   transform: scale(0.4) translateX(-40px);
   pointer-events: none;
