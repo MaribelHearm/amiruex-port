@@ -38,6 +38,18 @@ export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = (
         Tools
       </Link>
       <Link
+        href="/wandering"
+        className={`site-nav__link${pathname?.startsWith('/wandering') ? ' site-nav__link--active' : ''}`}
+      >
+        Wandering
+      </Link>
+      <Link
+        href="/photography"
+        className={`site-nav__link${pathname?.startsWith('/photography') ? ' site-nav__link--active' : ''}`}
+      >
+        摄影
+      </Link>
+      <Link
         href="/about"
         className={`site-nav__link${pathname?.startsWith('/about') ? ' site-nav__link--active' : ''}`}
       >

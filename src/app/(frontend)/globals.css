@@ -1563,6 +1563,55 @@
   color: var(--muted-foreground);
 }
 
+/* ── 摄影页面 ── */
+.photo-grid {
+  columns: 2;
+  column-gap: 1rem;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .photo-grid {
+    columns: 3;
+  }
+}
+
+@media (min-width: 1280px) {
+  .photo-grid {
+    columns: 4;
+  }
+}
+
+.photo-card {
+  break-inside: avoid;
+  margin-bottom: 1rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: color-mix(in oklab, var(--card) 80%, transparent);
+  border: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.35);
+}
+
+.photo-card__img {
+  width: 100%;
+  display: block;
+}
+
+.photo-card__img img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.photo-card__caption {
+  padding: 0.65rem 0.85rem 0.75rem;
+}
+
 @keyframes home-float {
   0%,
   100% {
