@@ -38,6 +38,7 @@ export default async function SectionPostsPage({ section }: SectionPostsPageProp
       title: true,
       slug: true,
       categories: true,
+      excerpt: true,
       meta: true,
     },
   })
