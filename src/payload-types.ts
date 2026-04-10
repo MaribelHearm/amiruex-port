@@ -249,7 +249,11 @@ export interface Post {
    */
   isFeatured?: boolean | null;
   /**
-   * 自由标签，输入后按回车添加。与分类（Categories）的区别：标签更灵活、扁平，分类是预设的层级体系。
+   * 文章分类，从预设列表中选择。显示在 Hero 区标题上方。
+   */
+  categories?: (string | Category)[] | null;
+  /**
+   * 自由标签，输入后按回车添加。比分类更灵活，不需要预先定义。
    */
   tags?: string[] | null;
   /**
@@ -275,10 +279,6 @@ export interface Post {
    * 手动指定相关文章，显示在正文底部「延伸阅读」区。留空则不展示该区块。
    */
   relatedPosts?: (string | Post)[] | null;
-  /**
-   * 文章分类，从预设列表中选择。显示在 Hero 区标题上方。与标签（Tags）的区别：分类是预定义的正式体系。
-   */
-  categories?: (string | Category)[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -305,13 +305,34 @@ export interface Post {
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
-  /**
-   * URL 路径标识符，由标题自动生成（中文标题会转为拼音，如「深度思考」→「shen-du-si-kao」）。发布后尽量不要修改，否则原链接会失效。
-   */
   slug: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: string;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  parent?: (string | null) | Category;
+  breadcrumbs?:
+    | {
+        doc?: (string | null) | Category;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -429,30 +450,6 @@ export interface FolderInterface {
     totalDocs?: number;
   };
   folderType?: 'media'[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
- */
-export interface Category {
-  id: string;
-  title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1304,11 +1301,11 @@ export interface PostsSelect<T extends boolean = true> {
   section?: T;
   excerpt?: T;
   isFeatured?: T;
+  categories?: T;
   tags?: T;
   heroImage?: T;
   content?: T;
   relatedPosts?: T;
-  categories?: T;
   meta?:
     | T
     | {
