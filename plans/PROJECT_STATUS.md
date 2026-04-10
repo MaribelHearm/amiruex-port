@@ -1,6 +1,6 @@
 # 项目进度总览 · amireux.chat
 
-> 最后更新：2026-04-10
+> 最后更新：2026-04-10（portal.html 模块化重构完成）
 > 目标：个人数字门户，Next.js 15 + Payload CMS 4，自托管 Docker on home-103
 
 ---
@@ -102,7 +102,7 @@
 | **图片 gallery 支持**           | 功能 | Visual/Cos 页支持图集浏览                              |
 | **站点统计接入**                | 运维 | Umami 或 Plausible 自托管                              |
 | **更多 Tools 实现**             | 功能 | 扩充 `TOOL_ITEMS`，补充新工具                          |
-| **私有门户 portal.html 模块化** | 重构 | 当前为单文件 vanilla JS，可考虑迁移为 Next.js 页面组件 |
+| ~~**私有门户 portal.html 模块化**~~ ✅ | 重构 | 已迁移为 `(standalone)/private/portal/` 路由组，Server Component 鉴权 + PortalClient.tsx，移除 CDN 依赖 |
 | **E2E 测试补充**                | 测试 | `/private/portal` 403 场景、工具页交互                 |
 
 ---
