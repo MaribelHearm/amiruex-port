@@ -1,7 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
 import {
+  AlignFeature,
+  BlockquoteFeature,
   BlocksFeature,
+  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   HeadingFeature,
   HorizontalRuleFeature,
@@ -143,6 +146,9 @@ export const Posts: CollectionConfig<'posts'> = {
                     ...rootFeatures,
                     HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
                     BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
+                    BlockquoteFeature(),
+                    AlignFeature(),
+                    EXPERIMENTAL_TableFeature(),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),

@@ -71,6 +71,8 @@ export interface Config {
     posts: Post;
     media: Media;
     categories: Category;
+    fragments: Fragment;
+    photos: Photo;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -93,6 +95,8 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    fragments: FragmentsSelect<false> | FragmentsSelect<true>;
+    photos: PhotosSelect<false> | PhotosSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -112,10 +116,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    about: About;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    about: AboutSelect<false> | AboutSelect<true>;
   };
   locale: null;
   widgets: {
@@ -226,14 +232,29 @@ export interface Page {
  */
 export interface Post {
   id: string;
+  /**
+   * 文章标题，显示在列表页、文章页 Hero 区及浏览器标签。
+   */
   title: string;
+  /**
+   * 控制文章归属的栏目区域，影响首页各区块的文章来源筛选。
+   */
   section: 'home' | 'aletheia-infra' | 'coding-tools' | 'guides-docs' | 'visual-cos-craft' | 'about';
   /**
-   * 文章摘要（用于列表与首页展示）
+   * 文章摘要（最多 220 字）。显示在卡片列表、首页推荐区，不影响正文。
    */
   excerpt: string;
+  /**
+   * 勾选后文章会被标记为「精选」，可在首页特定区块优先展示。
+   */
   isFeatured?: boolean | null;
+  /**
+   * 自由标签，输入后按回车添加。与分类（Categories）的区别：标签更灵活、扁平，分类是预设的层级体系。
+   */
   tags?: string[] | null;
+  /**
+   * 文章封面图。显示在文章页顶部全屏 Hero 区，也作为卡片列表的封面缩略图（优先级高于 SEO 图）。建议尺寸 1920×1080 或更宽。
+   */
   heroImage?: (string | null) | Media;
   content: {
     root: {
@@ -250,7 +271,13 @@ export interface Post {
     };
     [k: string]: unknown;
   };
+  /**
+   * 手动指定相关文章，显示在正文底部「延伸阅读」区。留空则不展示该区块。
+   */
   relatedPosts?: (string | Post)[] | null;
+  /**
+   * 文章分类，从预设列表中选择。显示在 Hero 区标题上方。与标签（Tags）的区别：分类是预定义的正式体系。
+   */
   categories?: (string | Category)[] | null;
   meta?: {
     title?: string | null;
@@ -260,7 +287,13 @@ export interface Post {
     image?: (string | null) | Media;
     description?: string | null;
   };
+  /**
+   * 发布时间，显示在文章 Hero 区。留空时首次「发布」操作会自动填入当前时间。
+   */
   publishedAt?: string | null;
+  /**
+   * 文章作者，从后台用户列表中选择。显示在文章 Hero 区。可多选（合著）。
+   */
   authors?: (string | User)[] | null;
   populatedAuthors?:
     | {
@@ -789,6 +822,62 @@ export interface Form {
   createdAt: string;
 }
 /**
+ * 短随笔、过程性想法和未完成线索，显示在 /wandering 碎片区页面。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fragments".
+ */
+export interface Fragment {
+  id: string;
+  /**
+   * 碎片标题，一句话即可。
+   */
+  title: string;
+  /**
+   * 碎片正文，几句话的短想法或随笔。
+   */
+  content: string;
+  /**
+   * 发布时间，留空则发布时自动填入当前时间。
+   */
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * 上传照片，显示在 /photography 摄影区页面。
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "photos".
+ */
+export interface Photo {
+  id: string;
+  /**
+   * 照片文件，建议上传高分辨率原图，系统会自动生成缩略图。
+   */
+  image: string | Media;
+  /**
+   * 照片标题，可留空（留空则只显示图片）。
+   */
+  title?: string | null;
+  /**
+   * 照片说明文字，一两句话，可选。
+   */
+  description?: string | null;
+  /**
+   * 拍摄日期。
+   */
+  takenAt?: string | null;
+  /**
+   * 拍摄地点，如「上海 · 外滩」，可选。
+   */
+  location?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
@@ -993,6 +1082,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'fragments';
+        value: string | Fragment;
+      } | null)
+    | ({
+        relationTo: 'photos';
+        value: string | Photo;
       } | null)
     | ({
         relationTo: 'users';
@@ -1343,6 +1440,32 @@ export interface CategoriesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fragments_select".
+ */
+export interface FragmentsSelect<T extends boolean = true> {
+  title?: T;
+  content?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "photos_select".
+ */
+export interface PhotosSelect<T extends boolean = true> {
+  image?: T;
+  title?: T;
+  description?: T;
+  takenAt?: T;
+  location?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1702,6 +1825,67 @@ export interface Footer {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about".
+ */
+export interface About {
+  id: string;
+  /**
+   * 页头小标签，显示在标题上方。
+   */
+  tag?: string | null;
+  /**
+   * 页面主标题（h1）。
+   */
+  heading: string;
+  /**
+   * 页头副标题，一两句话介绍自己。
+   */
+  intro: string;
+  /**
+   * 「当前状态」区块的标题，一般不用改。
+   */
+  statusTitle?: string | null;
+  /**
+   * 当前在做什么、重心在哪里，经常更新这里。
+   */
+  statusContent: string;
+  /**
+   * 「为什么」区块的标题。
+   */
+  whyTitle?: string | null;
+  /**
+   * 站点存在的理由，一段话。
+   */
+  whyContent: string;
+  /**
+   * 碎碎念区块的标题。
+   */
+  notesTitle?: string | null;
+  /**
+   * 每条一句话，想加就加一行，想删就删。输入内容后折叠标签会自动显示内容预览。
+   */
+  notes?:
+    | {
+        /**
+         * 一条碎碎念，一句话即可。
+         */
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * 留白区标题。
+   */
+  placeholderTitle?: string | null;
+  /**
+   * 留白区说明文字，用来预告还没做但打算做的内容。
+   */
+  placeholderContent?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -1748,6 +1932,31 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about_select".
+ */
+export interface AboutSelect<T extends boolean = true> {
+  tag?: T;
+  heading?: T;
+  intro?: T;
+  statusTitle?: T;
+  statusContent?: T;
+  whyTitle?: T;
+  whyContent?: T;
+  notesTitle?: T;
+  notes?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  placeholderTitle?: T;
+  placeholderContent?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -1772,6 +1981,14 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'posts';
           value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'fragments';
+          value: string | Fragment;
+        } | null)
+      | ({
+          relationTo: 'photos';
+          value: string | Photo;
         } | null);
     global?: string | null;
     user?: (string | null) | User;
@@ -1808,7 +2025,25 @@ export interface BannerBlock {
  * via the `definition` "CodeBlock".
  */
 export interface CodeBlock {
-  language?: ('typescript' | 'javascript' | 'css') | null;
+  language?:
+    | (
+        | 'typescript'
+        | 'javascript'
+        | 'tsx'
+        | 'css'
+        | 'html'
+        | 'python'
+        | 'bash'
+        | 'go'
+        | 'rust'
+        | 'json'
+        | 'yaml'
+        | 'sql'
+        | 'markdown'
+        | 'dockerfile'
+        | 'plaintext'
+      )
+    | null;
   code: string;
   id?: string | null;
   blockName?: string | null;
