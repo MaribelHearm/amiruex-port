@@ -47,7 +47,7 @@ export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = (
         href="/photography"
         className={`site-nav__link${pathname?.startsWith('/photography') ? ' site-nav__link--active' : ''}`}
       >
-        摄影
+        Photos
       </Link>
       <Link
         href="/about"
