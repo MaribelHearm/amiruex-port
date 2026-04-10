@@ -1,5 +1,7 @@
+'use client'
+
 import { formatDateTime } from 'src/utilities/formatDateTime'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { Post } from '@/payload-types'
 
@@ -58,41 +60,53 @@ export const PostHero: React.FC<{
 }> = ({ post }) => {
   const { heroImage } = post
 
-  /* ── 有 Hero 图：全宽沉浸式 header ── */
+  const [overlayOpacity, setOverlayOpacity] = useState(1)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // 在前 40vh 内完成淡出
+      const threshold = window.innerHeight * 0.4
+      setOverlayOpacity(Math.max(0, 1 - window.scrollY / threshold))
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  /* ── 有 Hero 图：沉浸式 header，底部遮罩随滚动消失 ── */
   if (heroImage && typeof heroImage !== 'string') {
     return (
-      <div className="relative -mt-[10.4rem] h-screen overflow-hidden" style={{ zIndex: 1 }}>
+      <div className="relative -mt-[10.4rem] flex items-end min-h-[80vh] overflow-hidden" style={{ zIndex: 1 }}>
         {/* 图片：正常填充，z-index 高于 BackgroundFX（fixed z-index:0） */}
         <Media fill priority imgClassName="object-cover" resource={heroImage} />
 
-        {/* 顶部轻薄阅读遮罩：让 Header 区域文字可读 */}
+        {/* 顶部轻薄遮罩：让 Header 区域文字可读，不随滚动消失 */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 45%)',
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 40%)',
             zIndex: 1,
           }}
         />
 
-        {/* 地平线渐变：从背景色实色平滑过渡到透明，制造 "地平线" 视觉 */}
+        {/* 底部地平线渐变：随滚动淡出 */}
         <div
           className="absolute bottom-0 left-0 right-0 pointer-events-none"
           style={{
             height: '52%',
+            opacity: overlayOpacity,
             background: [
               'linear-gradient(to top,',
               '  var(--background) 8%,',
               '  color-mix(in oklch, var(--background) 55%, transparent) 40%,',
               '  color-mix(in oklch, var(--background) 18%, transparent) 70%,',
-              '  transparent 100%',
-              ')',
+              '  transparent 100%)',
             ].join(' '),
             zIndex: 1,
           }}
         />
 
-        {/* 文字信息：位于底部，叠在渐变之上 */}
-        <div className="absolute bottom-0 left-0 right-0 container pb-14" style={{ zIndex: 2 }}>
+        {/* 文字信息：底部，叠在渐变之上 */}
+        <div className="container pb-14 relative" style={{ zIndex: 2 }}>
           <div className="max-w-[48rem] mx-auto">
             <PostMeta post={post} />
           </div>
