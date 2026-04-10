@@ -10,6 +10,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { BackgroundFX } from '@/components/BackgroundFX'
+import { POSTS_PAGE_SIZE } from './constants'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
@@ -21,7 +22,7 @@ export default async function Page() {
     payload.find({
       collection: 'posts',
       depth: 1,
-      limit: 12,
+      limit: POSTS_PAGE_SIZE,
       overrideAccess: false,
       select: {
         title: true,
@@ -74,7 +75,7 @@ export default async function Page() {
         <PageRange
           collection="posts"
           currentPage={posts.page}
-          limit={12}
+          limit={POSTS_PAGE_SIZE}
           totalDocs={posts.totalDocs}
         />
       </div>

@@ -9,7 +9,7 @@ import { CollectionArchive } from '@/components/CollectionArchive'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
-    id?: string
+    id?: string | null
   }
 > = async (props) => {
   const { id, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props

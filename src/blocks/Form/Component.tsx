@@ -1,6 +1,4 @@
 'use client'
-import type { FormFieldBlock, Form as FormType } from '@payloadcms/plugin-form-builder/types'
-
 import { useRouter } from 'next/navigation'
 import React, { useCallback, useState } from 'react'
 import { useForm, FormProvider } from 'react-hook-form'
@@ -8,20 +6,21 @@ import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
+import type { Form as PayloadForm, FormBlock as PayloadFormShape } from '@/payload-types'
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
 
 export type FormBlockType = {
-  blockName?: string
-  blockType?: 'formBlock'
-  enableIntro: boolean
-  form: FormType
-  introContent?: DefaultTypedEditorState
+  blockName?: PayloadFormShape['blockName']
+  blockType?: PayloadFormShape['blockType']
+  enableIntro?: PayloadFormShape['enableIntro']
+  form: PayloadForm
+  introContent?: PayloadFormShape['introContent']
 }
 
 export const FormBlock: React.FC<
   {
-    id?: string
+    id?: string | null
   } & FormBlockType
 > = (props) => {
   const {
@@ -31,8 +30,8 @@ export const FormBlock: React.FC<
     introContent,
   } = props
 
-  const formMethods = useForm({
-    defaultValues: formFromProps.fields,
+  const formMethods = useForm<Record<string, unknown>>({
+    defaultValues: {},
   })
   const {
     control,
@@ -47,7 +46,7 @@ export const FormBlock: React.FC<
   const router = useRouter()
 
   const onSubmit = useCallback(
-    (data: FormFieldBlock[]) => {
+    (data: Record<string, unknown>) => {
       let loadingTimerID: ReturnType<typeof setTimeout>
       const submitForm = async () => {
         setError(undefined)
@@ -120,9 +119,13 @@ export const FormBlock: React.FC<
       )}
       <div className="p-4 lg:p-6 border border-border rounded-[0.8rem]">
         <FormProvider {...formMethods}>
-          {!isLoading && hasSubmitted && confirmationType === 'message' && (
-            <RichText data={confirmationMessage} />
-          )}
+          {!isLoading &&
+            hasSubmitted &&
+            confirmationType === 'message' &&
+            confirmationMessage &&
+            typeof confirmationMessage === 'object' && (
+              <RichText data={confirmationMessage as DefaultTypedEditorState} />
+            )}
           {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
           {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
           {!hasSubmitted && (
@@ -131,8 +134,9 @@ export const FormBlock: React.FC<
                 {formFromProps &&
                   formFromProps.fields &&
                   formFromProps.fields?.map((field, index) => {
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const Field: React.FC<any> = fields?.[field.blockType as keyof typeof fields]
+                    const Field = fields?.[field.blockType as keyof typeof fields] as
+                      | React.ComponentType<Record<string, unknown>>
+                      | undefined
                     if (Field) {
                       return (
                         <div className="mb-6 last:mb-0" key={index}>

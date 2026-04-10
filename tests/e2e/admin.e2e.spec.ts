@@ -18,6 +18,12 @@ test.describe('Admin Panel', () => {
     await cleanupTestUser()
   })
 
+  test('redirects anonymous user to admin login', async ({ page }) => {
+    await page.goto('http://localhost:3000/admin')
+    await expect(page).toHaveURL(/\/admin\/login/)
+    await expect(page.locator('#field-email')).toBeVisible()
+  })
+
   test('can navigate to dashboard', async () => {
     await page.goto('http://localhost:3000/admin')
     await expect(page).toHaveURL('http://localhost:3000/admin')

@@ -8,16 +8,10 @@ import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 
-const blockComponents = {
-  archive: ArchiveBlock,
-  content: ContentBlock,
-  cta: CallToActionBlock,
-  formBlock: FormBlock,
-  mediaBlock: MediaBlock,
-}
+type LayoutBlock = Page['layout'][number]
 
 export const RenderBlocks: React.FC<{
-  blocks: Page['layout'][0][]
+  blocks: LayoutBlock[]
 }> = (props) => {
   const { blocks } = props
 
@@ -27,21 +21,44 @@ export const RenderBlocks: React.FC<{
     return (
       <Fragment>
         {blocks.map((block, index) => {
-          const { blockType } = block
-
-          if (blockType && blockType in blockComponents) {
-            const Block = blockComponents[blockType]
-
-            if (Block) {
+          switch (block.blockType) {
+            case 'archive':
               return (
                 <div className="my-16" key={index}>
-                  {/* @ts-expect-error there may be some mismatch between the expected types here */}
-                  <Block {...block} disableInnerContainer />
+                  <ArchiveBlock {...block} />
                 </div>
               )
-            }
+            case 'content':
+              return (
+                <div className="my-16" key={index}>
+                  <ContentBlock {...block} />
+                </div>
+              )
+            case 'cta':
+              return (
+                <div className="my-16" key={index}>
+                  <CallToActionBlock {...block} />
+                </div>
+              )
+            case 'formBlock':
+              if (typeof block.form !== 'object' || block.form === null) {
+                return null
+              }
+
+              return (
+                <div className="my-16" key={index}>
+                  <FormBlock {...block} form={block.form} />
+                </div>
+              )
+            case 'mediaBlock':
+              return (
+                <div className="my-16" key={index}>
+                  <MediaBlock {...block} disableInnerContainer />
+                </div>
+              )
+            default:
+              return null
           }
-          return null
         })}
       </Fragment>
     )

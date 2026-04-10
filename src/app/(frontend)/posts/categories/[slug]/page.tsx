@@ -10,6 +10,7 @@ import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import { BackgroundFX } from '@/components/BackgroundFX'
 import PageClient from '../../page.client'
+import { POSTS_PAGE_SIZE } from '../../constants'
 
 export const revalidate = 600
 
@@ -42,7 +43,7 @@ export default async function CategoryPage({ params }: Args) {
   const posts = await payload.find({
     collection: 'posts',
     depth: 1,
-    limit: 12,
+    limit: POSTS_PAGE_SIZE,
     overrideAccess: false,
     where: { categories: { contains: category.id } },
     select: {
@@ -86,7 +87,7 @@ export default async function CategoryPage({ params }: Args) {
         <PageRange
           collection="posts"
           currentPage={posts.page}
-          limit={12}
+          limit={POSTS_PAGE_SIZE}
           totalDocs={posts.totalDocs}
         />
       </div>

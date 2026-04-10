@@ -10,23 +10,23 @@
 
 ### 第一轮 — 基础框架搭建
 
-| 功能 | 说明 |
-|------|------|
-| 六模块内容分区 | `Posts` 新增 `section` 字段，将内容分流到 6 个栏目；各分区路由从 `posts` 按 `section` 自动筛选 |
-| 分区路由 | `/aletheia-infra`、`/coding-tools`、`/guides-docs`、`/visual-cos-craft`、`/about`、`/posts`（blog 主页） |
-| 私有基础设施门户 | `/private/portal`，复用 `payload.auth()` 鉴权，未登录返回 403 并引导跳转 `/admin` |
-| 汉字 slug 支持 | 引入 `pinyin-pro`，为 Posts 和 Categories 集合生成拼音 slug，空标题时返回 `undefined` 避免唯一键冲突 |
+| 功能             | 说明                                                                                                     |
+| ---------------- | -------------------------------------------------------------------------------------------------------- |
+| 六模块内容分区   | `Posts` 新增 `section` 字段，将内容分流到 6 个栏目；各分区路由从 `posts` 按 `section` 自动筛选           |
+| 分区路由         | `/aletheia-infra`、`/coding-tools`、`/guides-docs`、`/visual-cos-craft`、`/about`、`/posts`（blog 主页） |
+| 私有基础设施门户 | `/private/portal`，复用 `payload.auth()` 鉴权，未登录返回 403 并引导跳转 `/admin`                        |
+| 汉字 slug 支持   | 引入 `pinyin-pro`，为 Posts 和 Categories 集合生成拼音 slug，空标题时返回 `undefined` 避免唯一键冲突     |
 
 ### 第二轮 — 内容生产与 Blog 体验
 
-| 功能 | 说明 |
-|------|------|
-| Dynamic Island 动态宽度 | 导航栏收缩为灵动岛后，宽度根据内部 `.site-nav` 实际 `scrollWidth` 自动计算，用 `@property --island-w`（`<length>` 类型）驱动 CSS transition |
-| Markdown 导入按钮 | Lexical 编辑器工具栏新增导入按钮，选取 Markdown 文本后 POST 至 `/next/markdown-to-lexical`，服务端转换为 Lexical JSON 后直接写入编辑器状态。支持：标题、有序/无序列表、引用块、加粗/斜体/删除线/行内代码、链接。**不支持代码块**（Payload 用自己的 `Code` Block 实现，与 `@lexical/code` 不兼容） |
-| Blog 分类系统 | Categories collection 已有；新增前台 `/posts` 和 `/posts/categories/[slug]` 页面的分类筛选 pills；分类标签显示在 Card 组件 |
-| 分类字段位置调整 | Categories 选择器移到始终可见的侧边栏（之前藏在”关联设置” tab 内） |
-| write-post 写作助手 | `~/.claude/commands/write-post.md`：Claude Code 技能 (`/write-post`)，输入主题后生成完整文章草稿，包含结构化字段（标题/摘要/栏目/标签）+ 正文 Markdown |
-| autosave 间隔调整 | 由 100ms 改为 2000ms，避免空 slug 在快速自动保存时触发唯一键约束错误导致黑屏 |
+| 功能                    | 说明                                                                                                                                                                                                                                                                                              |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dynamic Island 动态宽度 | 导航栏收缩为灵动岛后，宽度根据内部 `.site-nav` 实际 `scrollWidth` 自动计算，用 `@property --island-w`（`<length>` 类型）驱动 CSS transition                                                                                                                                                       |
+| Markdown 导入按钮       | Lexical 编辑器工具栏新增导入按钮，选取 Markdown 文本后 POST 至 `/next/markdown-to-lexical`，服务端转换为 Lexical JSON 后直接写入编辑器状态。支持：标题、有序/无序列表、引用块、加粗/斜体/删除线/行内代码、链接。**不支持代码块**（Payload 用自己的 `Code` Block 实现，与 `@lexical/code` 不兼容） |
+| Blog 分类系统           | Categories collection 已有；新增前台 `/posts` 和 `/posts/categories/[slug]` 页面的分类筛选 pills；分类标签显示在 Card 组件                                                                                                                                                                        |
+| 分类字段位置调整        | Categories 选择器移到始终可见的侧边栏（之前藏在”关联设置” tab 内）                                                                                                                                                                                                                                |
+| write-post 写作助手     | `~/.claude/commands/write-post.md`：Claude Code 技能 (`/write-post`)，输入主题后生成完整文章草稿，包含结构化字段（标题/摘要/栏目/标签）+ 正文 Markdown                                                                                                                                            |
+| autosave 间隔调整       | 由 100ms 改为 2000ms，避免空 slug 在快速自动保存时触发唯一键约束错误导致黑屏                                                                                                                                                                                                                      |
 
 ---
 
@@ -61,14 +61,14 @@
 
 ## Section 枚举
 
-| 值 | 含义 |
-|----|------|
-| `home` | 首页聚合 |
-| `aletheia-infra` | 基础设施 / 工程实践 |
-| `coding-tools` | 编码 / 工具链 / 效率 |
-| `guides-docs` | 教程 / 文档 / 知识整理 |
+| 值                 | 含义                     |
+| ------------------ | ------------------------ |
+| `home`             | 首页聚合                 |
+| `aletheia-infra`   | 基础设施 / 工程实践      |
+| `coding-tools`     | 编码 / 工具链 / 效率     |
+| `guides-docs`      | 教程 / 文档 / 知识整理   |
 | `visual-cos-craft` | 视觉 / 摄影 / Cos / 手作 |
-| `about` | 随笔 / 碎碎念 |
+| `about`            | 随笔 / 碎碎念            |
 
 ---
 
@@ -84,11 +84,11 @@ npm run generate:types
 
 按用途选择启动脚本：
 
-| 脚本 | 用途 | 堆内存 |
-|------|------|--------|
-| `npm run dev:site` | 只看前台 | 1024 MB |
+| 脚本                | 用途       | 堆内存  |
+| ------------------- | ---------- | ------- |
+| `npm run dev:site`  | 只看前台   | 1024 MB |
 | `npm run dev:admin` | 需要进后台 | 2048 MB |
-| `npm run dev:lite` | 常规开发 | 1536 MB |
+| `npm run dev:lite`  | 常规开发   | 1536 MB |
 
 **建议**：先用 `dev:site` 确认前台，再按需切换。避免启动后立即访问 `/admin`（会触发更重的编译）。
 
@@ -120,10 +120,16 @@ This template is right for you if you are working on:
 
 Core features:
 
-- [Payload Website Template](#payload-website-template)
-  - [Personal Portal Quick Notes（当前项目定制）](#personal-portal-quick-notes当前项目定制)
-    - [Section 枚举](#section-枚举)
-    - [轻量验证与启动（推荐）](#轻量验证与启动推荐)
+- [Amireux Personal Portal — next-portal](#amireux-personal-portal--next-portal)
+  - [已完成功能（两轮迭代汇总）](#已完成功能两轮迭代汇总)
+    - [第一轮 — 基础框架搭建](#第一轮--基础框架搭建)
+    - [第二轮 — 内容生产与 Blog 体验](#第二轮--内容生产与-blog-体验)
+  - [当前限制](#当前限制)
+  - [计划 / 未来改进](#计划--未来改进)
+  - [私有基础设施门户](#私有基础设施门户)
+  - [Section 枚举](#section-枚举)
+  - [本地开发](#本地开发)
+  - [云端部署说明](#云端部署说明)
   - [Quick Start](#quick-start)
     - [Clone](#clone)
     - [Development](#development)
@@ -147,6 +153,7 @@ Core features:
       - [Local development](#local-development)
       - [Migrations](#migrations)
     - [Docker](#docker)
+    - [运维基线（Build / Runtime）](#运维基线build--runtime)
     - [Seed](#seed)
   - [Production](#production)
     - [Deploying to Vercel](#deploying-to-vercel)
@@ -347,10 +354,32 @@ This command will check for any migrations that have not yet been run and try to
 Alternatively, you can use [Docker](https://www.docker.com) to spin up this template locally. To do so, follow these steps:
 
 1. Follow [steps 1 and 2 from above](#development), the docker-compose file will automatically use the `.env` file in your project root
-1. Next run `docker-compose up`
+1. Next run `docker compose up`
+1. The compose service uses Node 22 + pnpm (`corepack enable && pnpm install --frozen-lockfile && pnpm dev`) to align with this repository's toolchain
 1. Follow [steps 4 and 5 from above](#development) to login and create your first admin user
 
 That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
+
+### 运维基线（Build / Runtime）
+
+- **Node / 包管理器统一**：推荐 `Node 22` + `pnpm`，通过 `corepack enable` 启用，避免本地与容器构建行为漂移。
+- **构建与启动基线**：`pnpm install --frozen-lockfile` → `pnpm build` → `pnpm start`。
+- **关键环境变量（必须）**：
+  - `DATABASE_URL`
+  - `PAYLOAD_SECRET`
+  - `NEXT_PUBLIC_SERVER_URL`
+  - `CRON_SECRET`
+  - `PREVIEW_SECRET`
+- **私有门户配置变量（可选）**：
+  - `PORTAL_TAGLINE`：覆盖私有门户顶栏标语。
+  - `PORTAL_SERVICES_JSON`：覆盖服务清单，需为 JSON 数组，元素最少包含 `name` / `desc` / `category`。
+
+示例（单行 JSON，便于 `.env` 使用）：
+
+```env
+PORTAL_TAGLINE=DIGITAL SOVEREIGNTY PORTAL · 192.168.1.103
+PORTAL_SERVICES_JSON=[{"name":"LobeChat","desc":"AI 对话平台","category":"核心应用","internal":"http://192.168.1.103:3210","external":"https://ai.amireux.chat"}]
+```
 
 ### Seed
 

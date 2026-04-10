@@ -59,6 +59,9 @@ PAYLOAD_SECRET=<同本地>
 NEXT_PUBLIC_SERVER_URL=https://amireux.chat
 CRON_SECRET=<随机值>
 PREVIEW_SECRET=<随机值>
+# 可选：覆盖私有门户展示配置
+# PORTAL_TAGLINE=DIGITAL SOVEREIGNTY PORTAL · 192.168.1.103
+# PORTAL_SERVICES_JSON=[{"name":"LobeChat","desc":"AI 对话平台","category":"核心应用","internal":"http://192.168.1.103:3210","external":"https://ai.amireux.chat"}]
 ```
 
 ---
@@ -93,11 +96,14 @@ PREVIEW_SECRET=<随机值>
 
 ## 四、构建注意事项
 
-| 项目 | 说明 |
-|------|------|
-| `npm install` 而非 `npm ci` | npm v10 不将 peer deps 写入 lock file，`npm ci` 会报错 |
-| `--network=host` | Payload 在 build 阶段连 DB，builder 容器需要宿主网络 |
-| build-time `.env` | 用 `127.0.0.1:27017`；runtime `.env` 用容器名 |
+| 项目                 | 说明                                                                                |
+| -------------------- | ----------------------------------------------------------------------------------- |
+| Node / 包管理器      | 推荐 Node 22 + pnpm，执行 `corepack enable` 后使用 `pnpm install --frozen-lockfile` |
+| 构建命令             | 推荐 `pnpm build`（保持与仓库主线一致）                                             |
+| 运行命令             | 推荐 `pnpm start`                                                                   |
+| `--network=host`     | Payload 在 build 阶段连 DB，builder 容器需要宿主网络                                |
+| build-time `.env`    | 用 `127.0.0.1:27017`；runtime `.env` 用容器名                                       |
+| 私有门户配置（可选） | `PORTAL_TAGLINE`、`PORTAL_SERVICES_JSON`，用于覆盖 `/private/portal` 显示数据       |
 
 ---
 

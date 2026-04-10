@@ -8,6 +8,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { POSTS_PAGE_SIZE } from '../../constants'
 
 export const revalidate = 600
 
@@ -28,7 +29,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const posts = await payload.find({
     collection: 'posts',
     depth: 1,
-    limit: 12,
+    limit: POSTS_PAGE_SIZE,
     page: sanitizedPageNumber,
     overrideAccess: false,
   })
@@ -46,7 +47,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         <PageRange
           collection="posts"
           currentPage={posts.page}
-          limit={12}
+          limit={POSTS_PAGE_SIZE}
           totalDocs={posts.totalDocs}
         />
       </div>
@@ -76,7 +77,7 @@ export async function generateStaticParams() {
     overrideAccess: false,
   })
 
-  const totalPages = Math.ceil(totalDocs / 10)
+  const totalPages = Math.ceil(totalDocs / POSTS_PAGE_SIZE)
 
   const pages: { pageNumber: string }[] = []
 
