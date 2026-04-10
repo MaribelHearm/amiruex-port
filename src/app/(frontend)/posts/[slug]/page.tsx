@@ -64,7 +64,7 @@ export default async function Post({ params: paramsPromise }: Args) {
 
       <PostHero post={post} />
 
-      <div className="post-body container">
+      <div className="post-body container -mt-8 relative" style={{ zIndex: 1 }}>
         <div className="post-body__surface max-w-[48rem] mx-auto">
           <RichText data={post.content} enableGutter={false} enableProse />
         </div>

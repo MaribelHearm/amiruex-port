@@ -61,12 +61,39 @@ export const PostHero: React.FC<{
   /* ── 有 Hero 图：全宽沉浸式 header ── */
   if (heroImage && typeof heroImage !== 'string') {
     return (
-      <div className="relative -mt-[10.4rem] flex items-end min-h-[80vh] select-none overflow-hidden">
-        <Media fill priority imgClassName="-z-10 object-cover" resource={heroImage} />
-        {/* 渐变：从底部透明背景色过渡，而非硬编码黑色 */}
-        <div className="absolute inset-0 bg-linear-to-t from-background/90 via-background/30 to-transparent pointer-events-none" />
-        <div className="container z-10 relative lg:grid lg:grid-cols-[1fr_48rem_1fr] pb-10">
-          <div className="col-start-1 col-span-1 md:col-start-2 md:col-span-2">
+      <div className="relative -mt-[10.4rem] h-screen overflow-hidden" style={{ zIndex: 1 }}>
+        {/* 图片：正常填充，z-index 高于 BackgroundFX（fixed z-index:0） */}
+        <Media fill priority imgClassName="object-cover" resource={heroImage} />
+
+        {/* 顶部轻薄阅读遮罩：让 Header 区域文字可读 */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 45%)',
+            zIndex: 1,
+          }}
+        />
+
+        {/* 地平线渐变：从背景色实色平滑过渡到透明，制造 "地平线" 视觉 */}
+        <div
+          className="absolute bottom-0 left-0 right-0 pointer-events-none"
+          style={{
+            height: '52%',
+            background: [
+              'linear-gradient(to top,',
+              '  var(--background) 8%,',
+              '  color-mix(in oklch, var(--background) 55%, transparent) 40%,',
+              '  color-mix(in oklch, var(--background) 18%, transparent) 70%,',
+              '  transparent 100%',
+              ')',
+            ].join(' '),
+            zIndex: 1,
+          }}
+        />
+
+        {/* 文字信息：位于底部，叠在渐变之上 */}
+        <div className="absolute bottom-0 left-0 right-0 container pb-14" style={{ zIndex: 2 }}>
+          <div className="max-w-[48rem] mx-auto">
             <PostMeta post={post} />
           </div>
         </div>
@@ -74,9 +101,9 @@ export const PostHero: React.FC<{
     )
   }
 
-  /* ── 无 Hero 图：紧凑文字 header，背景图透出 ── */
+  /* ── 无 Hero 图：紧凑文字 header，BackgroundFX 透出 ── */
   return (
-    <div className="post-hero-text container">
+    <div className="post-hero-text container" style={{ position: 'relative', zIndex: 1 }}>
       <div className="post-hero-text__inner">
         <PostMeta post={post} light />
       </div>
