@@ -1,0 +1,161 @@
+name: PR Codex Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  codex-review:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build PR diff
+        shell: bash
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          git diff --unified=1 --no-color "origin/${{ github.base_ref }}...HEAD" > pr.diff
+          head -c 120000 pr.diff > pr-trimmed.diff || true
+
+      - name: Generate Codex review markdown
+        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_REVIEW_MODEL: ${{ vars.OPENAI_REVIEW_MODEL }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
+          import urllib.error
+
+          marker = '<!-- codex-review-bot -->'
+
+          api_key = os.getenv('OPENAI_API_KEY', '').strip()
+          model = os.getenv('OPENAI_REVIEW_MODEL', '').strip() or 'gpt-4.1-mini'
+          base_url = os.getenv('OPENAI_BASE_URL', '').strip() or 'https://api.openai.com/v1'
+
+          if not api_key:
+              with open('review.md', 'w', encoding='utf-8') as f:
+                  f.write(
+                      marker + '\n' +
+                      '## 🤖 Codex 自动审查\n\n' +
+                      '⚠️ 跳过执行：未配置仓库 Secret `OPENAI_API_KEY`。\n'
+                  )
+              raise SystemExit(0)
+
+          try:
+              with open('pr-trimmed.diff', 'r', encoding='utf-8') as f:
+                  diff = f.read()
+          except FileNotFoundError:
+              diff = ''
+
+          prompt = (
+              '你是严格的代码审查机器人，请基于下面的 PR diff 输出中文审查意见。\n\n'
+              '输出格式要求：\n'
+              '1) 先给“总体结论”（一句话）\n'
+              '2) 按严重级别分组：阻断问题 / 建议优化 / 可选改进\n'
+              '3) 每条必须包含：文件路径 + 风险说明 + 建议改法\n'
+              '4) 如果未发现问题，明确写“未发现阻断问题”，并给 1-3 条质量提升建议\n'
+              '5) 不要输出与 diff 无关的内容\n\n'
+              'PR DIFF:\n' + diff
+          )
+
+          payload = {
+              'model': model,
+              'temperature': 0.1,
+              'messages': [
+                  {'role': 'system', 'content': '你是资深代码审查工程师。'},
+                  {'role': 'user', 'content': prompt},
+              ],
+          }
+
+          endpoint = base_url.rstrip('/') + '/chat/completions'
+
+          req = urllib.request.Request(
+              endpoint,
+              data=json.dumps(payload).encode('utf-8'),
+              headers={
+                  'Content-Type': 'application/json',
+                  'Authorization': f'Bearer {api_key}',
+              },
+              method='POST',
+          )
+
+          content = ''
+          try:
+              with urllib.request.urlopen(req, timeout=120) as resp:
+                  data = json.loads(resp.read().decode('utf-8'))
+                  content = (
+                      data.get('choices', [{}])[0]
+                      .get('message', {})
+                      .get('content', '')
+                      .strip()
+                  )
+          except urllib.error.HTTPError as e:
+              detail = e.read().decode('utf-8', errors='ignore')
+              content = f'审查失败：OpenAI API HTTP {e.code} {detail}'
+          except Exception as e:
+              content = f'审查失败：{e}'
+
+          if not content:
+              content = '未获取到审查结果。'
+
+          with open('review.md', 'w', encoding='utf-8') as f:
+              f.write(
+                  marker + '\n' +
+                  '## 🤖 Codex 自动审查\n\n' +
+                  content + '\n\n' +
+                  '> 说明：本评论由 GitHub Actions 自动生成。\n'
+              )
+          PY
+
+      - name: Upsert PR review comment
+        uses: actions/github-script@v7
+        env:
+          REVIEW_BODY_PATH: review.md
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('node:fs')
+            const body = fs.readFileSync(process.env.REVIEW_BODY_PATH, 'utf8')
+            const marker = '<!-- codex-review-bot -->'
+            const { owner, repo } = context.repo
+            const issue_number = context.issue.number
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            })
+
+            const botComment = comments.find((c) =>
+              c.user?.type === 'Bot' && typeof c.body === 'string' && c.body.includes(marker),
+            )
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: botComment.id,
+                body,
+              })
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              })
+            }
