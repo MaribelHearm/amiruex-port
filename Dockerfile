@@ -48,6 +48,8 @@ ENV NODE_ENV production
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+RUN apk add --no-cache ffmpeg python3 py3-pip && pip3 install --break-system-packages yt-dlp
+
 # Remove this line if you do not have this folder
 COPY --from=builder /app/public ./public
 
