@@ -27,6 +27,29 @@ jobs:
           git diff --unified=1 --no-color "origin/${{ github.base_ref }}...HEAD" > pr.diff
           head -c 120000 pr.diff > pr-trimmed.diff || true
 
+      - name: Endpoint preflight diagnostics
+        shell: bash
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL }}
+        run: |
+          set +e
+          BASE_URL="${OPENAI_BASE_URL:-https://api.openai.com/v1}"
+          echo "[diag] base_url=$BASE_URL"
+
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "[diag] OPENAI_API_KEY is empty"
+            exit 0
+          fi
+
+          HTTP_CODE=$(curl -sS -o /tmp/openai_models_resp.txt -w "%{http_code}" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            "$BASE_URL/models")
+          echo "[diag] GET $BASE_URL/models -> HTTP $HTTP_CODE"
+          echo "[diag] response preview:"
+          head -c 280 /tmp/openai_models_resp.txt || true
+          echo
+
       - name: Generate Codex review markdown
         shell: bash
         env:
@@ -39,6 +62,7 @@ jobs:
           import os
           import urllib.request
           import urllib.error
+          from urllib.parse import urlparse
 
           marker = '<!-- codex-review-bot -->'
 
@@ -82,6 +106,11 @@ jobs:
           }
 
           endpoint = base_url.rstrip('/') + '/chat/completions'
+          parsed = urlparse(base_url)
+          print(f"[diag] model={model}")
+          print(f"[diag] base_url_host={parsed.netloc}, base_url_path={parsed.path}")
+          print(f"[diag] endpoint={endpoint}")
+          print(f"[diag] diff_size={len(diff)}")
 
           req = urllib.request.Request(
               endpoint,
@@ -105,6 +134,8 @@ jobs:
                   )
           except urllib.error.HTTPError as e:
               detail = e.read().decode('utf-8', errors='ignore')
+              print(f"[diag] HTTPError status={e.code}")
+              print(f"[diag] HTTPError body={detail[:600]}")
               content = f'审查失败：OpenAI API HTTP {e.code} {detail}'
           except Exception as e:
               content = f'审查失败：{e}'
