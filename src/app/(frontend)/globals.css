@@ -2614,3 +2614,40 @@ html[data-theme='light'] {
   color: var(--background);
   border-color: var(--foreground);
 }
+
+/* ============================================================
+   RICH TEXT MOBILE OVERFLOW FIX
+   防止长 URL、长 token、代码行在移动端溢出容器
+   ============================================================ */
+
+/* 所有文字节点：遇到无空格长字符串自动在任意位置断行 */
+.payload-richtext {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
+}
+
+/* 链接：优先在任意位置断，避免长 URL 顶破布局 */
+.payload-richtext a {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+/* 代码块：横向滚动，不强制折行 */
+.payload-richtext pre {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* inline code 也要能断行 */
+.payload-richtext :not(pre) > code {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+/* 表格：超宽时横向滚动，不溢出 */
+.payload-richtext table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
