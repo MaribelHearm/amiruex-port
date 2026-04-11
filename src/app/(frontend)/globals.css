@@ -1278,6 +1278,22 @@
   background: var(--hp-card-bg);
   border-color: var(--hp-border);
   box-shadow: var(--hp-shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 顶部霓虹彩线（设计系统补全） */
+[data-theme='dark'] .home-tool-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg,
+    oklch(65% 0.22 320deg) 0%,
+    oklch(60% 0.18 278deg) 50%,
+    oklch(68% 0.16 198deg) 100%
+  );
+  pointer-events: none;
 }
 
 [data-theme='dark'] .home-tool-card:hover {
@@ -1288,6 +1304,94 @@
 
 .home-tool-card--upcoming {
   border-style: dashed;
+}
+
+/* 分类 pill：三色对应 fun / tech / utility */
+.home-tool-card__cat {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid;
+}
+
+.home-tool-card__cat--fun {
+  color: oklch(68% 0.2 320deg);
+  border-color: oklch(65% 0.22 320deg / 0.3);
+  background: oklch(65% 0.22 320deg / 0.08);
+}
+
+.home-tool-card__cat--tech {
+  color: oklch(65% 0.16 278deg);
+  border-color: oklch(60% 0.18 278deg / 0.3);
+  background: oklch(60% 0.18 278deg / 0.08);
+}
+
+.home-tool-card__cat--utility {
+  color: oklch(70% 0.14 198deg);
+  border-color: oklch(68% 0.16 198deg / 0.3);
+  background: oklch(68% 0.16 198deg / 0.08);
+}
+
+/* 图标容器 */
+.home-tool-card__icon {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.home-tool-card:hover .home-tool-card__icon {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.home-tool-card__icon-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.home-tool-card__icon--fun .home-tool-card__icon-dot {
+  background: oklch(65% 0.22 320deg);
+  box-shadow: 0 0 6px oklch(65% 0.22 320deg / 0.6);
+}
+
+.home-tool-card__icon--tech .home-tool-card__icon-dot {
+  background: oklch(60% 0.18 278deg);
+  box-shadow: 0 0 6px oklch(60% 0.18 278deg / 0.6);
+}
+
+.home-tool-card__icon--utility .home-tool-card__icon-dot {
+  background: oklch(68% 0.16 198deg);
+  box-shadow: 0 0 6px oklch(68% 0.16 198deg / 0.6);
+}
+
+/* OPEN TOOL 进入提示：hover 时从左滑入 */
+.home-tool-card__arrow {
+  margin-top: 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: oklch(55% 0.1 278deg);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 180ms ease, transform 180ms ease, color 180ms ease;
+}
+
+.home-tool-card:hover .home-tool-card__arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: oklch(70% 0.16 278deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-tool-card__arrow {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 .home-tool-card__status {
