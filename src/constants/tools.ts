@@ -43,6 +43,15 @@ export const TOOL_ITEMS: ToolItem[] = [
     mvpScope: '支持角色、背景、任务、格式四段式结构化生成。',
   },
   {
+    slug: 'bilibili-audio-transcriber',
+    title: 'Bilibili 音频转文字',
+    summary: '支持 B 站链接与本地音频上传，异步转写并可复制全文，支持任务 ID 找回。',
+    category: 'tech',
+    status: 'available',
+    tags: ['MVP', 'ASR', '任务制'],
+    mvpScope: '10 分钟内音频转写 + 进度条 + 任务 ID 查询恢复。',
+  },
+  {
     slug: 'personality-quiz-lite',
     title: '人格特质小测试',
     summary: '轻量题目评估你的偏好风格，产出可分享的人格卡。',

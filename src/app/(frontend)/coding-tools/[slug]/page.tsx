@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { BilibiliAudioTranscriberPlayground } from '@/components/tools/BilibiliAudioTranscriberPlayground'
 import { ProfileCardPlayground } from '@/components/tools/ProfileCardPlayground'
 import { PromptPolisherPlayground } from '@/components/tools/PromptPolisherPlayground'
 import { UnderConstruction } from '@/components/UnderConstruction'
@@ -73,7 +74,8 @@ export default async function ToolDetailPage({ params: paramsPromise }: Args) {
         <div className="relative z-10">
           {tool.slug === 'profile-card-generator' && <ProfileCardPlayground />}
           {tool.slug === 'prompt-polisher' && <PromptPolisherPlayground />}
-          {tool.slug !== 'profile-card-generator' && tool.slug !== 'prompt-polisher' && (
+          {tool.slug === 'bilibili-audio-transcriber' && <BilibiliAudioTranscriberPlayground />}
+          {tool.slug !== 'profile-card-generator' && tool.slug !== 'prompt-polisher' && tool.slug !== 'bilibili-audio-transcriber' && (
             <UnderConstruction
               tag={TOOL_STATUS_LABEL[tool.status]}
               title={`${tool.title} 正在推进中`}
