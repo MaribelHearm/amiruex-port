@@ -50,8 +50,9 @@ UI 入口：`src/app/(frontend)/tools/` 或嵌入首页工具区块。
 
 ## 三、上云配合 checklist（每个新工具必须完成）
 
-在提交 PR 前，确认以下三项全部就绪，否则 `/ops:menhu` 的 pre-flight 检查会拦截部署：
+在提交 PR 前，先通过“开发者人工验收”，再确认以下三项全部就绪，否则 `/ops:menhu` 的 pre-flight 检查会拦截部署：
 
+- [ ] **开发者人工验收已通过（强制）**：由开发者本人完成本地手工检查（功能正确、UI 正确、关键路径无明显 bug）
 - [ ] **`.env.example` 已更新**：新工具所有环境变量都有占位符和注释
 - [ ] **`Dockerfile` 已更新**：新的系统依赖已加入（如有）
 - [ ] **`plans/<tool-id>-cloud-readme.md` 已创建**：记录以下内容：
@@ -73,13 +74,13 @@ UI 入口：`src/app/(frontend)/tools/` 或嵌入首页工具区块。
 <一句话描述>
 
 ## 新增环境变量
-| 变量名 | 用途 | 获取方式 |
-|--------|------|----------|
+| 变量名      | 用途          | 获取方式       |
+| ----------- | ------------- | -------------- |
 | FOO_API_KEY | 调用 Foo 服务 | foo.com 控制台 |
 
 ## 新增系统依赖
-| 包名 | 版本 | 安装方式 |
-|------|------|----------|
+| 包名   | 版本 | 安装方式       |
+| ------ | ---- | -------------- |
 | ffmpeg | ≥6.0 | apk add ffmpeg |
 
 ## 验证
@@ -91,8 +92,8 @@ curl -X POST https://amireux.chat/api/<tool-id> -d '{"test":true}'
 
 ## 五、已有工具的云端信息
 
-| 工具 | 关键 env var | 系统依赖 |
-|------|-------------|----------|
+| 工具               | 关键 env var                                                                                                         | 系统依赖                     |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
 | 转录（transcribe） | `TENCENT_ASR_*`, `AZURE_SPEECH_*`, `TRANSCRIBE_YTDLP_PATH=/usr/bin/yt-dlp`, `TRANSCRIBE_FFMPEG_PATH=/usr/bin/ffmpeg` | ffmpeg, yt-dlp（Alpine apk） |
 
 > 完整 env 见 `/data/aletheia/Aletheia-Ops/deployments/next-portal/.env.example`

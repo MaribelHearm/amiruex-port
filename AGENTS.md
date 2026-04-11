@@ -13,6 +13,48 @@ You are an expert Payload CMS developer. When working with Payload projects, fol
 7. **UI Consistency Gate**: Any new UI / card / page must comply with [`design-system.md`](next-portal/.roo/rules/design-system.md)
 8. **Tools Delivery Gate**: Any new tool development must follow [`tools-workflow.md`](next-portal/.roo/rules/tools-workflow.md), including synchronized updates to [`.env.example`](next-portal/.env.example), [`Dockerfile`](next-portal/Dockerfile), and tool cloud readme requirements defined in [`plans/<tool-id>-cloud-readme.md` checklist](next-portal/.roo/rules/tools-workflow.md:57).
 
+### Agent Contract (PR Collaboration)
+
+For this repository, collaboration is split across three agents with strict boundaries:
+
+1. **RooCode (implementation + guardrails)**
+
+   - Must follow [`design-system.md`](next-portal/.roo/rules/design-system.md) for any UI/card/page changes.
+   - Must follow [`tools-workflow.md`](next-portal/.roo/rules/tools-workflow.md) for any tool/module delivery changes.
+   - Must complete a developer self-check before opening PR: function correctness, UI correctness, and key-path bug scan.
+   - Must provide implementation handoff artifacts in PR description:
+     - change summary
+     - affected files list
+     - local validation results (`npm run lint`, `npx tsc --noEmit`)
+
+2. **/ui (CC) (visual consistency reviewer)**
+
+   - Reviews only UI/interaction quality.
+   - Checks alignment with design tokens, card template, motion, and anti-patterns in [`design-system.md`](next-portal/.roo/rules/design-system.md).
+   - Must output: pass/fail + mismatches + concrete fix suggestions.
+
+3. **/ops:menhu (CC) (cloud/runtime reviewer)**
+
+   - Reviews only deploy/runtime readiness for changed tools/services.
+   - Performs pre-flight diff checks for [`.env.example`](next-portal/.env.example), [`Dockerfile`](next-portal/Dockerfile), and cloud-readme checklist defined by [`tools-workflow.md`](next-portal/.roo/rules/tools-workflow.md:51).
+   - Must output: added/changed env vars, system dependency changes, deployment verification conclusion.
+
+### PR Handoff Requirements
+
+PR creation order (mandatory):
+1. Finish local automated validation (`npm run lint`, `npx tsc --noEmit`, and build/test as applicable)
+2. Finish developer self-check (function correctness, UI correctness, key-path bug scan)
+3. Push branch and open PR on GitHub
+
+Every PR should include these handoff blocks to reduce cross-agent sync overhead:
+
+- `Implementation` (RooCode)
+- `UI Review` (/ui)
+- `Ops Review` (/ops:menhu)
+- `Risk & Rollback`
+
+If any required block is missing, the PR is considered not ready for merge.
+
 ### Code Validation
 
 - To validate typescript correctness after modifying code run `tsc --noEmit`
