@@ -9,7 +9,7 @@ import { HomeScrollRevealController } from '@/components/home/HomeScrollRevealCo
 import { HeroParticles } from '@/components/home/HeroParticles'
 import { HeroTypewriter } from '@/components/home/HeroTypewriter'
 import { formatDateTime } from '@/utilities/formatDateTime'
-import { TOOL_ITEMS } from '@/constants/tools'
+import { TOOL_ITEMS, TOOL_CATEGORY_LABEL } from '@/constants/tools'
 import { EXTENSION_MODULES } from '@/constants/extension-modules'
 
 export const revalidate = 600
@@ -271,13 +271,17 @@ export default async function HomePage() {
             {toolsAvailable.map((tool) => (
               <Link key={tool.slug} href={`/coding-tools/${tool.slug}`} className="home-tool-card group">
                 <div className="flex justify-between items-start mb-4">
-                  <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold uppercase">Available</span>
-                  <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
+                  <div className="flex items-center gap-2">
+                    <span className="text-[0.65rem] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold uppercase">Available</span>
+                    <span className={`home-tool-card__cat home-tool-card__cat--${tool.category}`}>{TOOL_CATEGORY_LABEL[tool.category]}</span>
+                  </div>
+                  <div className={`home-tool-card__icon home-tool-card__icon--${tool.category} w-8 h-8 rounded-lg flex items-center justify-center`}>
+                    <div className="home-tool-card__icon-dot" />
                   </div>
                 </div>
                 <h3 className="text-lg font-bold mb-2">{tool.title}</h3>
                 <p className="text-sm text-muted-foreground">{tool.summary}</p>
+                <div className="home-tool-card__arrow">OPEN TOOL →</div>
               </Link>
             ))}
             <div className="home-tool-card border-dashed opacity-60 flex flex-col justify-center items-center text-center p-8">
