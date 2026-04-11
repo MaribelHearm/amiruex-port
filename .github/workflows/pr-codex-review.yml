@@ -123,7 +123,34 @@ jobs:
               'PR DIFF:\n' + diff
           )
 
-          payload = {
+          parsed = urlparse(base_url)
+          base = base_url.rstrip('/')
+          responses_endpoint = base + '/responses'
+          chat_endpoint = base + '/chat/completions'
+
+          print(f"[diag] model={model}")
+          print(f"[diag] base_url_host={parsed.netloc}, base_url_path={parsed.path}")
+          print(f"[diag] responses_endpoint={responses_endpoint}")
+          print(f"[diag] chat_endpoint={chat_endpoint}")
+          print(f"[diag] diff_size={len(diff)}")
+
+          headers = {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'User-Agent': 'github-actions-codex-review/1.0',
+              'Authorization': f'Bearer {api_key}',
+          }
+
+          responses_payload = {
+              'model': model,
+              'temperature': 0.1,
+              'input': [
+                  {'role': 'system', 'content': '你是资深代码审查工程师。'},
+                  {'role': 'user', 'content': prompt},
+              ],
+          }
+
+          chat_payload = {
               'model': model,
               'temperature': 0.1,
               'messages': [
@@ -132,74 +159,113 @@ jobs:
               ],
           }
 
-          endpoint = base_url.rstrip('/') + '/chat/completions'
-          parsed = urlparse(base_url)
-          print(f"[diag] model={model}")
-          print(f"[diag] base_url_host={parsed.netloc}, base_url_path={parsed.path}")
-          print(f"[diag] endpoint={endpoint}")
-          print(f"[diag] diff_size={len(diff)}")
+          def extract_text_from_chat(data):
+              choices = data.get('choices') or []
+              first_choice = choices[0] if isinstance(choices, list) and choices else {}
+              message = first_choice.get('message') if isinstance(first_choice, dict) else {}
+              message = message if isinstance(message, dict) else {}
 
-          req = urllib.request.Request(
-              endpoint,
-              data=json.dumps(payload).encode('utf-8'),
-              headers={
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                  'User-Agent': 'github-actions-codex-review/1.0',
-                  'Authorization': f'Bearer {api_key}',
-              },
-              method='POST',
-          )
+              msg_content = message.get('content')
+              if isinstance(msg_content, str) and msg_content.strip():
+                  return msg_content.strip()
+              if isinstance(msg_content, list):
+                  parts = []
+                  for item in msg_content:
+                      if isinstance(item, dict):
+                          text = item.get('text')
+                          if isinstance(text, str) and text.strip():
+                              parts.append(text.strip())
+                  if parts:
+                      return '\n'.join(parts)
+
+              reasoning = message.get('reasoning_content')
+              if isinstance(reasoning, str) and reasoning.strip():
+                  return reasoning.strip()
+
+              return ''
+
+          def extract_text_from_responses(data):
+              output_text = data.get('output_text')
+              if isinstance(output_text, str) and output_text.strip():
+                  return output_text.strip()
+
+              output = data.get('output')
+              if isinstance(output, list):
+                  parts = []
+                  for item in output:
+                      if not isinstance(item, dict):
+                          continue
+                      content_items = item.get('content')
+                      if not isinstance(content_items, list):
+                          continue
+                      for c in content_items:
+                          if not isinstance(c, dict):
+                              continue
+                          text = c.get('text')
+                          if isinstance(text, str) and text.strip():
+                              parts.append(text.strip())
+                  if parts:
+                      return '\n'.join(parts)
+
+              return ''
 
           content = ''
+          diag_errors = []
+
+          # 1) 优先走 responses
           try:
+              req = urllib.request.Request(
+                  responses_endpoint,
+                  data=json.dumps(responses_payload).encode('utf-8'),
+                  headers=headers,
+                  method='POST',
+              )
               with urllib.request.urlopen(req, timeout=120) as resp:
                   raw_text = resp.read().decode('utf-8', errors='ignore')
                   data = json.loads(raw_text)
-
-                  # 兼容不同网关/模型返回结构
-                  choices = data.get('choices') or []
-                  first_choice = choices[0] if isinstance(choices, list) and choices else {}
-                  message = first_choice.get('message') if isinstance(first_choice, dict) else {}
-                  message = message if isinstance(message, dict) else {}
-
-                  msg_content = message.get('content')
-                  if isinstance(msg_content, str) and msg_content.strip():
-                      content = msg_content.strip()
-                  elif isinstance(msg_content, list):
-                      parts = []
-                      for item in msg_content:
-                          if isinstance(item, dict):
-                              text = item.get('text')
-                              if isinstance(text, str) and text.strip():
-                                  parts.append(text.strip())
-                      if parts:
-                          content = '\n'.join(parts)
-
+                  content = extract_text_from_responses(data)
                   if not content:
-                      reasoning = message.get('reasoning_content')
-                      if isinstance(reasoning, str) and reasoning.strip():
-                          content = reasoning.strip()
-
-                  if not content:
-                      output_text = data.get('output_text')
-                      if isinstance(output_text, str) and output_text.strip():
-                          content = output_text.strip()
-
-                  if not content:
-                      content = '审查接口返回成功，但未返回可解析文本。'
-                      print(f"[diag] response_keys={list(data.keys())}")
-                      print(f"[diag] response_preview={raw_text[:600]}")
+                      print(f"[diag] responses_keys={list(data.keys())}")
+                      print(f"[diag] responses_preview={raw_text[:600]}")
           except urllib.error.HTTPError as e:
               detail = e.read().decode('utf-8', errors='ignore')
-              print(f"[diag] HTTPError status={e.code}")
-              print(f"[diag] HTTPError body={detail[:600]}")
-              content = f'审查失败：OpenAI API HTTP {e.code} {detail}'
+              diag_errors.append(f'responses HTTP {e.code}: {detail[:240]}')
+              print(f"[diag] responses HTTPError status={e.code}")
+              print(f"[diag] responses HTTPError body={detail[:600]}")
           except Exception as e:
-              content = f'审查失败：{e}'
+              diag_errors.append(f'responses Exception: {e}')
+              print(f"[diag] responses Exception={e}")
+
+          # 2) responses 无文本时，回退 chat/completions
+          if not content:
+              try:
+                  req = urllib.request.Request(
+                      chat_endpoint,
+                      data=json.dumps(chat_payload).encode('utf-8'),
+                      headers=headers,
+                      method='POST',
+                  )
+                  with urllib.request.urlopen(req, timeout=120) as resp:
+                      raw_text = resp.read().decode('utf-8', errors='ignore')
+                      data = json.loads(raw_text)
+                      content = extract_text_from_chat(data)
+                      if not content:
+                          print(f"[diag] chat_keys={list(data.keys())}")
+                          print(f"[diag] chat_preview={raw_text[:600]}")
+              except urllib.error.HTTPError as e:
+                  detail = e.read().decode('utf-8', errors='ignore')
+                  diag_errors.append(f'chat HTTP {e.code}: {detail[:240]}')
+                  print(f"[diag] chat HTTPError status={e.code}")
+                  print(f"[diag] chat HTTPError body={detail[:600]}")
+              except Exception as e:
+                  diag_errors.append(f'chat Exception: {e}')
+                  print(f"[diag] chat Exception={e}")
+
+          if not content and diag_errors:
+              content = '审查失败：' + ' | '.join(diag_errors)
 
           if not content:
-              content = '未获取到审查结果。'
+              content = '审查接口返回成功，但未返回可解析文本。'
 
           with open('review.md', 'w', encoding='utf-8') as f:
               f.write(
