@@ -148,6 +148,11 @@ jobs:
                   {'role': 'system', 'content': '你是资深代码审查工程师。'},
                   {'role': 'user', 'content': prompt},
               ],
+              'text': {
+                  'format': {
+                      'type': 'text',
+                  }
+              },
           }
 
           chat_payload = {
@@ -157,6 +162,9 @@ jobs:
                   {'role': 'system', 'content': '你是资深代码审查工程师。'},
                   {'role': 'user', 'content': prompt},
               ],
+              'response_format': {
+                  'type': 'text',
+              },
           }
 
           def extract_text_from_chat(data):
@@ -225,7 +233,11 @@ jobs:
                   data = json.loads(raw_text)
                   content = extract_text_from_responses(data)
                   if not content:
+                      print(f"[diag] responses_status={data.get('status')}")
                       print(f"[diag] responses_keys={list(data.keys())}")
+                      usage = data.get('usage')
+                      if isinstance(usage, dict):
+                          print(f"[diag] responses_usage={usage}")
                       print(f"[diag] responses_preview={raw_text[:600]}")
           except urllib.error.HTTPError as e:
               detail = e.read().decode('utf-8', errors='ignore')
@@ -250,7 +262,11 @@ jobs:
                       data = json.loads(raw_text)
                       content = extract_text_from_chat(data)
                       if not content:
+                          print(f"[diag] chat_finish_reason={((data.get('choices') or [{}])[0] or {}).get('finish_reason')}")
                           print(f"[diag] chat_keys={list(data.keys())}")
+                          usage = data.get('usage')
+                          if isinstance(usage, dict):
+                              print(f"[diag] chat_usage={usage}")
                           print(f"[diag] chat_preview={raw_text[:600]}")
               except urllib.error.HTTPError as e:
                   detail = e.read().decode('utf-8', errors='ignore')
