@@ -52,6 +52,15 @@ export const TOOL_ITEMS: ToolItem[] = [
     mvpScope: '10 分钟内音频转写 + 进度条 + 任务 ID 查询恢复。',
   },
   {
+    slug: 'exchange-rate-calculator',
+    title: '汇率计算器',
+    summary: '输入金额并选择币种，快速完成多币种换算，适合出海和跨境场景。',
+    category: 'utility',
+    status: 'available',
+    tags: ['MVP', '金融工具', '效率'],
+    mvpScope: '支持常见货币互转、币种交换与结果快速复制。',
+  },
+  {
     slug: 'personality-quiz-lite',
     title: '人格特质小测试',
     summary: '轻量题目评估你的偏好风格，产出可分享的人格卡。',
