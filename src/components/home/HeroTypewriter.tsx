@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from 'react'
 
 const PHRASES = [
-  '重构首页视觉系统 v4',
-  '打磨灵动岛交互细节',
-  '整理工程实践笔记',
-  '探索滚动叙事新玩法',
+  '推进 Amireux Portal v2 持续迭代',
+  '完善 Payload CMS + Next.js 15 内容链路',
+  '沉淀 design-system 与 tools-workflow 规范',
+  '打磨 coding-tools 体验并准备云端交付',
 ]
 
 /** 星号循环帧：从简单到复杂再回来，营造旋转/脉动感 */

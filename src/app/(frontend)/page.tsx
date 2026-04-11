@@ -117,8 +117,8 @@ export default async function HomePage() {
                   <span className="home-hero__badge-dot" />
                   在线中
                 </span>
-                <span className="home-hero__badge">Phase 07</span>
-                <span className="home-hero__badge">上次更新 · 今日</span>
+                <span className="home-hero__badge">Cloud Iteration · v5+</span>
+                <span className="home-hero__badge">已上云稳定运行</span>
               </div>
 
               <div className="home-hero__actions">
@@ -162,8 +162,8 @@ export default async function HomePage() {
                 </div>
                 <div className="home-hero__stat-divider" aria-hidden />
                 <div className="home-hero__stat">
-                  <span className="home-hero__stat-val">07</span>
-                  <span className="home-hero__stat-key">阶段</span>
+                  <span className="home-hero__stat-val">v5+</span>
+                  <span className="home-hero__stat-key">云端迭代</span>
                 </div>
               </div>
 
@@ -172,7 +172,7 @@ export default async function HomePage() {
                 <div className="home-hero__update-bar" aria-hidden />
                 <div>
                   <p className="home-hero__update-label">最近更新</p>
-                  <p className="home-hero__update-text">灵动岛视觉系统 v12 上线</p>
+                  <p className="home-hero__update-text">已上云并持续迭代多个版本，当前为稳定在线演进态</p>
                 </div>
               </div>
             </aside>
@@ -305,12 +305,12 @@ export default async function HomePage() {
             <div className="construction-card p-5 md:p-8 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="construction-card__tag">PHASE 07</span>
-                  <span className="text-xs font-bold text-success">ACTIVE DEVELOPMENT</span>
+                  <span className="construction-card__tag">CLOUD STAGE</span>
+                  <span className="text-xs font-bold text-success">ACTIVE MAINTENANCE</span>
                 </div>
                 <h3 className="text-xl font-bold mb-2">站点演进状态</h3>
                 <p className="text-sm text-muted-foreground">
-                  目前正在进行 Phase 7：视觉架构重构。已完成灵动岛导航系统与全站毛玻璃材质统一。
+                  首页最后一张卡片 UI 设计已完成，当前进入上云后的内容更新与修复优化阶段（持续小步迭代）。
                 </p>
               </div>
               <div className="mt-8 h-1.5 w-full bg-white/5 rounded-full overflow-hidden">

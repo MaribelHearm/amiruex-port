@@ -38,6 +38,34 @@ export default async function AboutPage() {
   const notes = data?.notes ?? []
   const placeholderTitle = data?.placeholderTitle ?? '留白区（持续扩展）'
   const placeholderContent = data?.placeholderContent ?? ''
+  const placeholderLines = placeholderContent
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+  const placeholderNodes: Array<{ type: 'text' | 'heading' | 'list'; value: string | string[] }> = []
+  let pendingList: string[] = []
+
+  for (const line of placeholderLines) {
+    const isBullet = /^[-•]\s+/.test(line)
+
+    if (isBullet) {
+      pendingList.push(line.replace(/^[-•]\s+/, ''))
+      continue
+    }
+
+    if (pendingList.length > 0) {
+      placeholderNodes.push({ type: 'list', value: pendingList })
+      pendingList = []
+    }
+
+    const isHeading = /[：:]$/.test(line)
+    placeholderNodes.push({ type: isHeading ? 'heading' : 'text', value: line })
+  }
+
+  if (pendingList.length > 0) {
+    placeholderNodes.push({ type: 'list', value: pendingList })
+  }
 
   return (
     <main className="home-shell home-root-shell">
@@ -98,7 +126,40 @@ export default async function AboutPage() {
               {placeholderTitle}
             </h2>
             {placeholderContent && (
-              <p className="leading-relaxed mb-8">{placeholderContent}</p>
+              <div className="mb-8 space-y-3">
+                {placeholderNodes.length > 0 ? (
+                  placeholderNodes.map((node, idx) => {
+                    if (node.type === 'list') {
+                      const items = node.value as string[]
+                      return (
+                        <ul key={idx} className="space-y-2 pl-5 list-disc text-sm opacity-90">
+                          {items.map((item, itemIdx) => (
+                            <li key={`${idx}-${itemIdx}`} className="leading-relaxed">
+                              {item}
+                            </li>
+                          ))}
+                        </ul>
+                      )
+                    }
+
+                    if (node.type === 'heading') {
+                      return (
+                        <p key={idx} className="text-sm font-semibold tracking-wide text-primary/90">
+                          {node.value as string}
+                        </p>
+                      )
+                    }
+
+                    return (
+                      <p key={idx} className="leading-relaxed opacity-90">
+                        {node.value as string}
+                      </p>
+                    )
+                  })
+                ) : (
+                  <p className="leading-relaxed opacity-90 whitespace-pre-line">{placeholderContent}</p>
+                )}
+              </div>
             )}
             <div className="flex flex-wrap gap-4">
               <Link href="/posts" className="home-btn home-btn--primary">

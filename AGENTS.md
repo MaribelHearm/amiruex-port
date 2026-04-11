@@ -10,6 +10,8 @@ You are an expert Payload CMS developer. When working with Payload projects, fol
 4. **Transaction Safety**: Always pass `req` to nested operations in hooks
 5. **Access Control**: Understand Local API bypasses access control by default
 6. **Access Control**: Ensure roles exist when modifiyng collection or globals with access controls
+7. **UI Consistency Gate**: Any new UI / card / page must comply with [`design-system.md`](next-portal/.roo/rules/design-system.md)
+8. **Tools Delivery Gate**: Any new tool development must follow [`tools-workflow.md`](next-portal/.roo/rules/tools-workflow.md), including synchronized updates to [`.env.example`](next-portal/.env.example), [`Dockerfile`](next-portal/Dockerfile), and tool cloud readme requirements defined in [`plans/<tool-id>-cloud-readme.md` checklist](next-portal/.roo/rules/tools-workflow.md:57).
 
 ### Code Validation
 
