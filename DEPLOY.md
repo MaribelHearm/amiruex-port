@@ -71,7 +71,7 @@ PREVIEW_SECRET=<随机值>
 在 home-103 的构建目录执行：
 
 ```bash
-cd /data/aletheia/build/next-portal && git pull && docker build --network=host -t amireux-portal:latest . && cd /data/aletheia/Aletheia-Ops/deployments/next-portal && docker compose up -d --force-recreate
+cd /data/aletheia/build/next-portal && git pull && docker build --network=host --build-arg PAYLOAD_SECRET=${PAYLOAD_SECRET} -t amireux-portal:latest . && cd /data/aletheia/Aletheia-Ops/deployments/next-portal && docker compose up -d --force-recreate
 ```
 
 > **必须用 `--network=host`**：`next build` 阶段 Payload CMS 会连接 MongoDB，builder 容器需要通过 `127.0.0.1:27017` 访问宿主机上的 MongoDB。

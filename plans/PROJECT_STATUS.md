@@ -152,7 +152,7 @@
 - **生产更新命令**（在 home-103）：
   ```bash
   cd /data/aletheia/build/next-portal && git pull && \
-  docker build --network=host -t amireux-portal:latest . && \
+  docker build --network=host --build-arg PAYLOAD_SECRET=${PAYLOAD_SECRET} -t amireux-portal:latest . && \
   cd /data/aletheia/Aletheia-Ops/deployments/next-portal && \
   docker compose up -d --force-recreate
   ```
