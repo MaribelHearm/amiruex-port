@@ -71,10 +71,12 @@ PREVIEW_SECRET=<随机值>
 在 home-103 的构建目录执行：
 
 ```bash
-cd /data/aletheia/build/next-portal && git pull && docker build --network=host --build-arg PAYLOAD_SECRET=${PAYLOAD_SECRET} -t amireux-portal:latest . && cd /data/aletheia/Aletheia-Ops/deployments/next-portal && docker compose up -d --force-recreate
+cd /data/aletheia/build/next-portal && git pull && BARGS=$(grep "^ARG " Dockerfile | awk '{print $2}' | cut -d= -f1 | while read k; do v=$(grep "^${k}=" .env | cut -d= -f2-); [ -n "$v" ] && printf -- "--build-arg %s=%s " "$k" "$v"; done) && docker build --network=host $BARGS -t amireux-portal:latest . && cd /data/aletheia/Aletheia-Ops/deployments/next-portal && docker compose up -d --force-recreate
 ```
 
 > **必须用 `--network=host`**：`next build` 阶段 Payload CMS 会连接 MongoDB，builder 容器需要通过 `127.0.0.1:27017` 访问宿主机上的 MongoDB。
+>
+> **build 命令自动检测 Dockerfile 所有 `ARG` 并从 `.env` 读取值。** 新增 build-time 变量只需：① Dockerfile `builder` stage 加 `ARG VAR` + `ENV VAR=$VAR`；② build-time `.env` 加 `VAR=value`（用 `127.0.0.1`）。值含 `=`（URL query、base64）已由 `cut -d= -f2-` 正确处理。
 
 ### 首次克隆（仅需一次）
 

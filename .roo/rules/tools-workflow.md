@@ -55,11 +55,25 @@ UI 入口：`src/app/(frontend)/tools/` 或嵌入首页工具区块。
 - [ ] **开发者人工验收已通过（强制）**：由开发者本人完成本地手工检查（功能正确、UI 正确、关键路径无明显 bug）
 - [ ] **`.env.example` 已更新**：新工具所有环境变量都有占位符和注释
 - [ ] **`Dockerfile` 已更新**：新的系统依赖已加入（如有）
+- [ ] **`Dockerfile` builder stage 已声明 `ARG`**：若新变量需在 `next build` 阶段访问（DB URL、服务端 API 密钥等），必须在 `builder` stage 加 `ARG VAR` + `ENV VAR=$VAR`。`.env` 被 `.dockerignore` 排除，不声明 `ARG` 则 `--build-arg` 传入无效，变量为空且构建不报错（静默失败）
 - [ ] **`plans/<tool-id>-cloud-readme.md` 已创建**：记录以下内容：
   - 工具功能简述
   - 新增环境变量列表（含用途、从哪里获取）
   - 新增系统依赖（含版本要求）
   - 上云验证方法（用什么请求/响应确认工具正常）
+
+---
+
+## 三-B、build-time 变量 vs runtime 变量
+
+`.env` 被 `.dockerignore` 排除，build 阶段无法读取文件，只能通过 `--build-arg` 注入。
+
+| 类型 | 使用时机 | 配置位置 | 提取方式 |
+| ---- | -------- | -------- | -------- |
+| **build-time** | `next build` 阶段（Payload 初始化、DB 连接、静态页生成） | Dockerfile `ARG`+`ENV` + build-time `.env`（`127.0.0.1`） | `cut -d= -f2-`（含 `=` 的值必须用） |
+| **runtime** | 容器运行阶段 | `deployments/next-portal/.env`（容器名） | — |
+
+**如何判断是否需要 build-time 声明**：`next build` 期间若有代码调用 Payload/DB（静态页 `generateStaticParams`、集合查询），该变量就需要 build-time 声明。纯前端工具（无 SSG、无 Payload 查询）通常只需 runtime。
 
 ---
 
@@ -106,3 +120,5 @@ curl -X POST https://amireux.chat/api/<tool-id> -d '{"test":true}'
 - **不跳过 `.env.example` 更新**（会被 pre-flight 检查拦截）
 - **不在 PR 里提交 `.env` 文件**（已在 `.dockerignore` 和 `.gitignore` 中排除）
 - **系统依赖不要装在 builder stage**（只装在 runner stage，减小镜像体积）
+- **不用 `cut -d= -f2` 提取 env 值**（URL query 参数、base64 含 `=` 会被截断）；统一用 `cut -d= -f2-`
+- **新增 build-time 变量后不忘在 Dockerfile `builder` stage 声明 `ARG`**（否则 `--build-arg` 传入无效，变量为空，构建静默失败）
