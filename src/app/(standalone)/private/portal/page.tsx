@@ -14,7 +14,7 @@ export default async function PortalPage() {
     redirect('/admin')
   }
 
-  const portalConfig = getPortalConfig()
+  const portalConfig = await getPortalConfig(payload, user)
 
   return (
     <PortalClient

@@ -71,6 +71,8 @@ export interface Config {
     posts: Post;
     media: Media;
     categories: Category;
+    'portal-categories': PortalCategory;
+    'portal-services': PortalService;
     fragments: Fragment;
     photos: Photo;
     users: User;
@@ -95,6 +97,8 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'portal-categories': PortalCategoriesSelect<false> | PortalCategoriesSelect<true>;
+    'portal-services': PortalServicesSelect<false> | PortalServicesSelect<true>;
     fragments: FragmentsSelect<false> | FragmentsSelect<true>;
     photos: PhotosSelect<false> | PhotosSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -822,6 +826,40 @@ export interface Form {
   createdAt: string;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "portal-categories".
+ */
+export interface PortalCategory {
+  id: string;
+  name: string;
+  /**
+   * 数字越小越靠前
+   */
+  order?: number | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "portal-services".
+ */
+export interface PortalService {
+  id: string;
+  name: string;
+  desc: string;
+  category: string | PortalCategory;
+  internal?: string | null;
+  external?: string | null;
+  /**
+   * 数字越小越靠前
+   */
+  order?: number | null;
+  enabled?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * 短随笔、过程性想法和未完成线索，显示在 /wandering 碎片区页面。
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1082,6 +1120,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: string | Category;
+      } | null)
+    | ({
+        relationTo: 'portal-categories';
+        value: string | PortalCategory;
+      } | null)
+    | ({
+        relationTo: 'portal-services';
+        value: string | PortalService;
       } | null)
     | ({
         relationTo: 'fragments';
@@ -1438,6 +1484,32 @@ export interface CategoriesSelect<T extends boolean = true> {
         label?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "portal-categories_select".
+ */
+export interface PortalCategoriesSelect<T extends boolean = true> {
+  name?: T;
+  order?: T;
+  enabled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "portal-services_select".
+ */
+export interface PortalServicesSelect<T extends boolean = true> {
+  name?: T;
+  desc?: T;
+  category?: T;
+  internal?: T;
+  external?: T;
+  order?: T;
+  enabled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
