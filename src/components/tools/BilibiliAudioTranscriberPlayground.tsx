@@ -40,7 +40,9 @@ export const BilibiliAudioTranscriberPlayground: React.FC = () => {
 
   const pollTask = async (taskId: string) => {
     const res = await fetch(`/next/transcribe/${taskId}`, { method: 'GET' })
-    const data = (await res.json()) as TaskResponse | { error?: { code?: string; message?: string } }
+    const data = (await res.json()) as
+      | TaskResponse
+      | { error?: { code?: string; message?: string } }
 
     if (!res.ok) {
       throw new Error((data as { error?: { message?: string } }).error?.message || '任务查询失败')
@@ -168,7 +170,9 @@ export const BilibiliAudioTranscriberPlayground: React.FC = () => {
 
         {sourceType === 'bilibili' ? (
           <div className="space-y-2 mb-4">
-            <p className="text-xs text-muted-foreground">输入 Bilibili 视频链接（10 分钟以内）</p>
+            <p className="text-xs text-muted-foreground">
+              输入 Bilibili 视频链接（默认最高 180 分钟，可通过环境变量调整）
+            </p>
             <Input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -177,7 +181,9 @@ export const BilibiliAudioTranscriberPlayground: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-2 mb-4">
-            <p className="text-xs text-muted-foreground">上传音频文件（10 分钟以内）</p>
+            <p className="text-xs text-muted-foreground">
+              上传音频文件（默认最高 180 分钟，可通过环境变量调整）
+            </p>
             <Input
               type="file"
               accept="audio/*"
@@ -224,8 +230,12 @@ export const BilibiliAudioTranscriberPlayground: React.FC = () => {
           )}
         </div>
 
-        <p className="text-xs text-muted-foreground break-all">任务ID：{task?.taskId || '未创建'}</p>
-        <p className="text-xs text-muted-foreground mt-1">状态：{task?.status || 'idle'} · {progressText}</p>
+        <p className="text-xs text-muted-foreground break-all">
+          任务ID：{task?.taskId || '未创建'}
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          状态：{task?.status || 'idle'} · {progressText}
+        </p>
 
         <div className="mt-3 h-2 rounded-full bg-white/10 overflow-hidden">
           <div
@@ -260,7 +270,9 @@ export const BilibiliAudioTranscriberPlayground: React.FC = () => {
           {!!task?.meta?.provider && (
             <p className="text-xs text-muted-foreground">
               Provider: {task.meta.provider}
-              {typeof task.meta.durationSec === 'number' ? ` · 时长约 ${Math.round(task.meta.durationSec)}s` : ''}
+              {typeof task.meta.durationSec === 'number'
+                ? ` · 时长约 ${Math.round(task.meta.durationSec)}s`
+                : ''}
             </p>
           )}
         </div>
