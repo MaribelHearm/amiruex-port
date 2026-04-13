@@ -64,13 +64,14 @@ class AppError extends Error {
 
 const TASK_TTL_MS = 1000 * 60 * 60 * 6
 const TASK_GC_INTERVAL_MS = Number(process.env.TRANSCRIBE_TASK_GC_INTERVAL_MS || 1000 * 60 * 10)
-const MAX_MINUTES = Number(process.env.TRANSCRIBE_MAX_MINUTES || 10)
+const MAX_MINUTES = Number(process.env.TRANSCRIBE_MAX_MINUTES || 180)
 const MAX_UPLOAD_MB = Number(process.env.TRANSCRIBE_MAX_UPLOAD_MB || 30)
-const COMMAND_TIMEOUT_MS = Number(process.env.TRANSCRIBE_TIMEOUT_MS || 1000 * 60 * 5)
+const COMMAND_TIMEOUT_MS = Number(process.env.TRANSCRIBE_TIMEOUT_MS || 1000 * 60 * 15)
 
 const getStore = (): Store => {
   const scoped = globalThis as typeof globalThis & { __transcribeTaskStore?: Store }
-  if (!scoped.__transcribeTaskStore) scoped.__transcribeTaskStore = new Map<string, TranscribeTask>()
+  if (!scoped.__transcribeTaskStore)
+    scoped.__transcribeTaskStore = new Map<string, TranscribeTask>()
   return scoped.__transcribeTaskStore
 }
 
@@ -128,15 +129,25 @@ export const getTask = (taskId: string): TranscribeTask | null => {
   return getStore().get(taskId) ?? null
 }
 
-const ALL_PROVIDERS: ProviderKey[] = ['tencent_asr', 'azure_speech_asr', 'openai_asr', 'custom_asr_http']
+const ALL_PROVIDERS: ProviderKey[] = [
+  'tencent_asr',
+  'azure_speech_asr',
+  'openai_asr',
+  'custom_asr_http',
+]
 
 export const listProviderChain = (): ProviderKey[] => {
-  const raw = (process.env.TRANSCRIBE_PROVIDER_CHAIN || 'tencent_asr,azure_speech_asr,openai_asr,custom_asr_http')
+  const raw = (
+    process.env.TRANSCRIBE_PROVIDER_CHAIN ||
+    'tencent_asr,azure_speech_asr,openai_asr,custom_asr_http'
+  )
     .split(',')
     .map((s) => s.trim())
     .filter(Boolean)
 
-  const chain = raw.filter((item): item is ProviderKey => ALL_PROVIDERS.includes(item as ProviderKey))
+  const chain = raw.filter((item): item is ProviderKey =>
+    ALL_PROVIDERS.includes(item as ProviderKey),
+  )
   if (chain.length === 0) return ALL_PROVIDERS
 
   return [...new Set(chain)]
@@ -354,7 +365,18 @@ const prepareTencentAudio = async (
   }
 
   const mp3Path = path.join(path.dirname(audioPath), 'tencent-input.mp3')
-  await runCommand('ffmpeg', ['-y', '-i', audioPath, '-ac', '1', '-ar', '16000', '-b:a', '32k', mp3Path])
+  await runCommand('ffmpeg', [
+    '-y',
+    '-i',
+    audioPath,
+    '-ac',
+    '1',
+    '-ar',
+    '16000',
+    '-b:a',
+    '32k',
+    mp3Path,
+  ])
 
   const mp3Stat = await fs.stat(mp3Path)
   if (mp3Stat.size > directMaxBytes) {
@@ -579,7 +601,9 @@ const isProviderConfigMissingError = (error: unknown): boolean => {
   return error instanceof Error && /\bmissing\b/i.test(error.message)
 }
 
-const transcribeWithProviderChain = async (audioPath: string): Promise<{ text: string; provider: ProviderKey }> => {
+const transcribeWithProviderChain = async (
+  audioPath: string,
+): Promise<{ text: string; provider: ProviderKey }> => {
   const chain = listProviderChain()
   const skippedByConfig: string[] = []
   const failedProviders: string[] = []
@@ -604,7 +628,9 @@ const transcribeWithProviderChain = async (audioPath: string): Promise<{ text: s
       }
     } catch (error) {
       if (isProviderConfigMissingError(error)) {
-        skippedByConfig.push(`${provider}: ${error instanceof Error ? error.message : String(error)}`)
+        skippedByConfig.push(
+          `${provider}: ${error instanceof Error ? error.message : String(error)}`,
+        )
         continue
       }
 
@@ -613,8 +639,12 @@ const transcribeWithProviderChain = async (audioPath: string): Promise<{ text: s
   }
 
   if (failedProviders.length > 0) {
-    const skipped = skippedByConfig.length > 0 ? `；未配置已跳过 -> ${skippedByConfig.join(' | ')}` : ''
-    throw new AppError('TRANSCRIBE_FAILED', `所有已配置 provider 失败: ${failedProviders.join(' | ')}${skipped}`)
+    const skipped =
+      skippedByConfig.length > 0 ? `；未配置已跳过 -> ${skippedByConfig.join(' | ')}` : ''
+    throw new AppError(
+      'TRANSCRIBE_FAILED',
+      `所有已配置 provider 失败: ${failedProviders.join(' | ')}${skipped}`,
+    )
   }
 
   if (skippedByConfig.length > 0) {
@@ -659,7 +689,7 @@ export const startTask = (taskId: string, payload: StartPayload): void => {
 
       patchTask(taskId, { progress: 45 })
       const durationSec = await probeDurationSec(normalizedAudioPath)
-      if (durationSec > MAX_MINUTES * 60) {
+      if (MAX_MINUTES > 0 && durationSec > MAX_MINUTES * 60) {
         throw new AppError('DURATION_EXCEEDED', `音频超过 ${MAX_MINUTES} 分钟上限`)
       }
 
