@@ -15,7 +15,7 @@ export default function NotFound() {
             链接可能已失效、内容被移动，或仍在建设中。
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="not-found-actions flex flex-wrap justify-center gap-4">
             <Link className="home-btn home-btn--primary" href="/">
               返回首页
             </Link>
