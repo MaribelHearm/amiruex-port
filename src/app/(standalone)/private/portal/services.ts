@@ -241,29 +241,20 @@ function buildDefaultPortalConfig(): PortalConfig {
   }
 }
 
-async function seedPortalDataIfEmpty(payload: Payload, user: User) {
-  const categoryNames = Array.from(
-    new Set([...DEFAULT_CATEGORIES, ...DEFAULT_SERVICES.map((s) => s.category)]),
-  )
-
-  const [existingCategories, existingServices] = await Promise.all([
-    payload.find({
-      collection: 'portal-categories',
-      limit: 200,
-      depth: 0,
-      user,
-      overrideAccess: false,
-    }),
-    payload.find({
-      collection: 'portal-services',
-      limit: 1000,
-      depth: 0,
-      user,
-      overrideAccess: false,
-    }),
-  ])
-
+async function syncPortalCategories(
+  payload: Payload,
+  user: User,
+  categoryNames: string[],
+): Promise<Map<string, string>> {
   const categoryMap = new Map<string, string>()
+
+  const existingCategories = await payload.find({
+    collection: 'portal-categories',
+    limit: 200,
+    depth: 0,
+    user,
+    overrideAccess: false,
+  })
 
   existingCategories.docs.forEach((category) => {
     categoryMap.set((category as PortalCategory).name, (category as PortalCategory).id)
@@ -301,13 +292,20 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
     })
   }
 
+  return categoryMap
+}
+
+async function syncPortalServices(
+  payload: Payload,
+  user: User,
+  categoryMap: Map<string, string>,
+  existingServices: PortalServiceDoc[],
+) {
   const existingServicesByName = new Map<string, PortalServiceDoc>()
 
-  existingServices.docs.forEach((service) => {
-    const typedService = service as PortalServiceDoc
-
-    if (typedService.name) {
-      existingServicesByName.set(typedService.name, typedService)
+  existingServices.forEach((service) => {
+    if (service.name) {
+      existingServicesByName.set(service.name, service)
     }
   })
 
@@ -358,7 +356,7 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
     })
   }
 
-  for (const service of existingServices.docs as PortalServiceDoc[]) {
+  for (const service of existingServices) {
     if (!service.id || !service.name || allowedServiceNames.has(service.name)) {
       continue
     }
@@ -375,11 +373,30 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
   }
 }
 
+async function syncPortalData(payload: Payload, user: User) {
+  const categoryNames = Array.from(
+    new Set([...DEFAULT_CATEGORIES, ...DEFAULT_SERVICES.map((s) => s.category)]),
+  )
+
+  const [categoryMap, existingServices] = await Promise.all([
+    syncPortalCategories(payload, user, categoryNames),
+    payload.find({
+      collection: 'portal-services',
+      limit: 1000,
+      depth: 0,
+      user,
+      overrideAccess: false,
+    }),
+  ])
+
+  await syncPortalServices(payload, user, categoryMap, existingServices.docs as PortalServiceDoc[])
+}
+
 export async function getPortalConfig(payload: Payload, user: User): Promise<PortalConfig> {
   const fallback = buildDefaultPortalConfig()
 
   try {
-    await seedPortalDataIfEmpty(payload, user)
+    await syncPortalData(payload, user)
 
     const [categoryResult, serviceResult] = await Promise.all([
       payload.find({
