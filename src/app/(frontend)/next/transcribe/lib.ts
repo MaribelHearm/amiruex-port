@@ -66,7 +66,12 @@ const TASK_TTL_MS = 1000 * 60 * 60 * 6
 const TASK_GC_INTERVAL_MS = Number(process.env.TRANSCRIBE_TASK_GC_INTERVAL_MS || 1000 * 60 * 10)
 const MAX_MINUTES = Number(process.env.TRANSCRIBE_MAX_MINUTES || 180)
 const MAX_UPLOAD_MB = Number(process.env.TRANSCRIBE_MAX_UPLOAD_MB || 30)
-const COMMAND_TIMEOUT_MS = Number(process.env.TRANSCRIBE_TIMEOUT_MS || 1000 * 60 * 15)
+const DEFAULT_COMMAND_TIMEOUT_MS = 1000 * 60 * 15
+const COMMAND_TIMEOUT_BUFFER_MS = 1000 * 60 * 5
+const COMMAND_TIMEOUT_MS = Number(
+  process.env.TRANSCRIBE_TIMEOUT_MS ||
+    Math.max(DEFAULT_COMMAND_TIMEOUT_MS, MAX_MINUTES * 60 * 1000 + COMMAND_TIMEOUT_BUFFER_MS),
+)
 
 const getStore = (): Store => {
   const scoped = globalThis as typeof globalThis & { __transcribeTaskStore?: Store }
