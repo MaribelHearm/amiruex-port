@@ -33,7 +33,7 @@ const DEFAULT_SERVICES: PortalService[] = [
   },
   {
     name: 'Dify',
-    desc: 'LLM 应用编排平台',
+    desc: '工作流 / 建档 / 自动化编排',
     category: '核心应用',
     external: 'https://dify.amireux.chat',
   },
@@ -60,21 +60,33 @@ const DEFAULT_SERVICES: PortalService[] = [
   },
   {
     name: 'Home Assistant',
-    desc: '智能家居控制',
+    desc: '智能家居自动化',
     category: '核心应用',
     internal: 'http://192.168.1.103:8123',
     external: 'https://ha.amireux.chat',
   },
   {
-    name: 'CLIProxyAPI',
-    desc: 'CLI 多模型代理服务',
+    name: 'Next Portal',
+    desc: '个人数字门户 / CMS 后台',
+    category: '核心应用',
+    external: 'https://amireux.chat',
+  },
+  {
+    name: 'Sub2API',
+    desc: '主中间层 / 聚合 API 网关 / Dify & Claude Code 入口',
     category: 'API 与代理',
-    internal: 'http://192.168.1.103:3011/management.html',
-    external: 'https://clip.amireux.chat/management.html',
+    internal: 'http://192.168.1.103:3232',
+    external: 'https://clip.amireux.chat',
+  },
+  {
+    name: 'CLIProxyAPI',
+    desc: 'CPA 号池 / 特殊反代（运行于 backup-vps）',
+    category: 'API 与代理',
+    internal: 'http://64.186.228.249:3011/management.html',
   },
   {
     name: 'EasyProxies',
-    desc: '多端口代理池管理',
+    desc: '代理池管理 / 多端口出口池',
     category: 'API 与代理',
     internal: 'http://192.168.1.103:9888',
     external: 'https://proxy.amireux.chat',
@@ -87,7 +99,7 @@ const DEFAULT_SERVICES: PortalService[] = [
   },
   {
     name: 'OutlookMail Plus',
-    desc: '邮箱接码 / 验证码提取',
+    desc: '邮箱接码 / 验证码提取 / Outlook OAuth',
     category: 'API 与代理',
     internal: 'http://192.168.1.103:5002',
   },
@@ -107,7 +119,7 @@ const DEFAULT_SERVICES: PortalService[] = [
   },
   {
     name: 'Aria2 / AriaNg',
-    desc: '下载工具',
+    desc: '下载管理',
     category: '基础设施',
     internal: 'http://192.168.1.103:6880',
     external: 'https://aria.amireux.chat',
@@ -132,7 +144,7 @@ const DEFAULT_SERVICES: PortalService[] = [
   },
   {
     name: 'MCP Wiki',
-    desc: 'Wiki 操作工具',
+    desc: 'Wiki 读写工具',
     category: 'MCP 工具',
     internal: 'http://192.168.1.103:3001',
   },
@@ -144,7 +156,7 @@ const DEFAULT_SERVICES: PortalService[] = [
   },
   {
     name: 'MCP Search',
-    desc: '搜索服务',
+    desc: '搜索与网页抓取',
     category: 'MCP 工具',
     internal: 'http://192.168.1.103:3002',
   },
@@ -162,9 +174,21 @@ const DEFAULT_SERVICES: PortalService[] = [
   },
   {
     name: 'MCP Media',
-    desc: '媒体服务',
+    desc: '媒体 / B站相关工具',
     category: 'MCP 工具',
     internal: 'http://192.168.1.103:3004',
+  },
+  {
+    name: 'MCP DevOps',
+    desc: 'Docker / 日志只读工具',
+    category: 'MCP 工具',
+    internal: 'http://192.168.1.103:3010',
+  },
+  {
+    name: 'MCP Archive Writer',
+    desc: 'OpenClaw 归档写入工具',
+    category: 'MCP 工具',
+    internal: 'http://192.168.1.103:3009',
   },
   { name: 'NapCat', desc: 'QQ 机器人', category: 'QQ Bot', internal: 'http://192.168.1.103:6099' },
   {
@@ -173,6 +197,17 @@ const DEFAULT_SERVICES: PortalService[] = [
     category: 'QQ Bot',
     internal: 'http://192.168.1.103:6098',
     external: 'http://192.168.1.103:40654/qce-v4-tool',
+  },
+  {
+    name: 'LinuxDo Collector',
+    desc: 'LinuxDo 日报采集',
+    category: 'QQ Bot',
+  },
+  {
+    name: 'LinuxDo Query',
+    desc: 'LinuxDo 按需查询接口',
+    category: 'QQ Bot',
+    internal: 'http://192.168.1.103:8765',
   },
 ]
 
@@ -187,6 +222,7 @@ interface PortalCategoryDoc {
 }
 
 interface PortalServiceDoc {
+  id?: string
   name: string
   desc: string
   internal?: string | null
@@ -234,7 +270,9 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
   })
 
   for (const [index, categoryName] of categoryNames.entries()) {
-    if (!categoryMap.has(categoryName)) {
+    const existingCategoryId = categoryMap.get(categoryName)
+
+    if (!existingCategoryId) {
       const createdCategory = await payload.create({
         collection: 'portal-categories',
         data: {
@@ -247,23 +285,60 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
       })
 
       categoryMap.set(createdCategory.name, createdCategory.id)
-    }
-  }
-
-  const existingServiceNames = new Set(
-    existingServices.docs
-      .map((service) => (service as PortalServiceDoc).name)
-      .filter((name): name is string => Boolean(name)),
-  )
-
-  for (const [index, service] of DEFAULT_SERVICES.entries()) {
-    if (existingServiceNames.has(service.name)) {
       continue
     }
 
+    await payload.update({
+      collection: 'portal-categories',
+      id: existingCategoryId,
+      data: {
+        name: categoryName,
+        order: index,
+        enabled: true,
+      },
+      user,
+      overrideAccess: false,
+    })
+  }
+
+  const existingServicesByName = new Map<string, PortalServiceDoc>()
+
+  existingServices.docs.forEach((service) => {
+    const typedService = service as PortalServiceDoc
+
+    if (typedService.name) {
+      existingServicesByName.set(typedService.name, typedService)
+    }
+  })
+
+  const allowedServiceNames = new Set(DEFAULT_SERVICES.map((service) => service.name))
+
+  for (const [index, service] of DEFAULT_SERVICES.entries()) {
     const categoryId = categoryMap.get(service.category)
 
     if (!categoryId) {
+      continue
+    }
+
+    const existingService = existingServicesByName.get(service.name)
+
+    if (existingService?.id) {
+      await payload.update({
+        collection: 'portal-services',
+        id: existingService.id,
+        data: {
+          name: service.name,
+          desc: service.desc,
+          category: categoryId,
+          internal: service.internal,
+          external: service.external,
+          order: index,
+          enabled: true,
+        },
+        user,
+        overrideAccess: false,
+      })
+
       continue
     }
 
@@ -277,6 +352,22 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
         external: service.external,
         order: index,
         enabled: true,
+      },
+      user,
+      overrideAccess: false,
+    })
+  }
+
+  for (const service of existingServices.docs as PortalServiceDoc[]) {
+    if (!service.id || !service.name || allowedServiceNames.has(service.name)) {
+      continue
+    }
+
+    await payload.update({
+      collection: 'portal-services',
+      id: service.id,
+      data: {
+        enabled: false,
       },
       user,
       overrideAccess: false,
