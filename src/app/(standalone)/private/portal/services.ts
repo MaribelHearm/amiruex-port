@@ -72,17 +72,11 @@ const DEFAULT_SERVICES: PortalService[] = [
     external: 'https://amireux.chat',
   },
   {
-    name: 'Sub2API',
-    desc: '主中间层 / 聚合 API 网关 / Dify & Claude Code 入口',
+    name: 'New API',
+    desc: 'LLM 聚合入口 / API 前门',
     category: 'API 与代理',
-    internal: 'http://192.168.1.103:3232',
+    internal: 'http://192.168.1.103:3300',
     external: 'https://clip.amireux.chat',
-  },
-  {
-    name: 'CLIProxyAPI',
-    desc: 'CPA 号池 / 特殊反代（运行于 backup-vps）',
-    category: 'API 与代理',
-    internal: 'http://64.186.228.249:3011/management.html',
   },
   {
     name: 'EasyProxies',
@@ -137,12 +131,6 @@ const DEFAULT_SERVICES: PortalService[] = [
     internal: 'http://192.168.1.103:5000',
   },
   {
-    name: 'Glances',
-    desc: '系统监控',
-    category: '基础设施',
-    internal: 'http://192.168.1.103:61208',
-  },
-  {
     name: 'MCP Wiki',
     desc: 'Wiki 读写工具',
     category: 'MCP 工具',
@@ -190,24 +178,23 @@ const DEFAULT_SERVICES: PortalService[] = [
     category: 'MCP 工具',
     internal: 'http://192.168.1.103:3009',
   },
-  { name: 'NapCat', desc: 'QQ 机器人', category: 'QQ Bot', internal: 'http://192.168.1.103:6099' },
+  {
+    name: 'NapCat',
+    desc: 'QQ Bot / OneBot 主后台',
+    category: 'QQ Bot',
+    internal: 'http://192.168.1.103:6099',
+  },
   {
     name: 'NapCat Exporter',
-    desc: '聊天记录导出 + QCE',
+    desc: 'QCE 专用 NapCat 实例后台',
     category: 'QQ Bot',
     internal: 'http://192.168.1.103:6098',
-    external: 'http://192.168.1.103:40654/qce-v4-tool',
   },
   {
-    name: 'LinuxDo Collector',
-    desc: 'LinuxDo 日报采集',
+    name: 'QCE',
+    desc: '聊天记录导出后台',
     category: 'QQ Bot',
-  },
-  {
-    name: 'LinuxDo Query',
-    desc: 'LinuxDo 按需查询接口',
-    category: 'QQ Bot',
-    internal: 'http://192.168.1.103:8765',
+    internal: 'http://192.168.1.103:40654/qce-v4-tool',
   },
 ]
 
