@@ -21,6 +21,7 @@ export default async function Page() {
   const [posts, categoriesResult] = await Promise.all([
     payload.find({
       collection: 'posts',
+      draft: false,
       depth: 1,
       limit: POSTS_PAGE_SIZE,
       overrideAccess: false,
