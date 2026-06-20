@@ -16,10 +16,7 @@ function cleanSha256(value: unknown): string {
 }
 
 function safeFilename(value: string) {
-  const filename = value
-    .trim()
-    .replace(/[/\\?%*:|"<>]/g, '-')
-    .replace(/\s+/g, '-')
+  const filename = value.trim().replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, '-')
   return filename || `writer-image-${Date.now()}`
 }
 
@@ -55,8 +52,6 @@ export async function POST(req: Request) {
 
     const existing = await payload.find({
       collection: 'media',
-      user,
-      overrideAccess: false,
       depth: 0,
       limit: 1,
       pagination: false,
@@ -83,7 +78,6 @@ export async function POST(req: Request) {
     const media = await payload.create({
       collection: 'media',
       user,
-      overrideAccess: false,
       depth: 0,
       data: { alt, writerFileHash: hash },
       file: {

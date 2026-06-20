@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CheckCircle2,
@@ -191,11 +190,6 @@ function normalizeFormState(form: FormState): FormState {
   }
 }
 
-function localSnapshotMatchesPost(snapshot: LocalDraftSnapshot, post: WriterPostDocument | null) {
-  if (!post) return true
-  return snapshot.form?.id === post.id
-}
-
 function tagsFromText(value: string): string[] {
   return value
     .split(',')
@@ -292,19 +286,15 @@ export function WriterClient({
     setLocalHistory(history)
 
     const snapshot = readLocalSnapshot(localDraftKey)
-    if (snapshot && localSnapshotMatchesPost(snapshot, initialPost)) {
+    if (snapshot) {
       restoreLocalSnapshot(snapshot, '本地自动保存')
       setLocalDraftState(`已恢复本地草稿：${formatSaveTime(snapshot.updatedAt)}`)
-    } else if (snapshot && initialPost) {
-      setLocalDraftState(
-        `检测到另一篇文章的本地草稿：${formatSaveTime(snapshot.updatedAt)}，已保留在历史里，未覆盖当前文章。`,
-      )
     } else {
       setLocalDraftState('本地自动保存已启用')
     }
 
     localAutosaveReadyRef.current = true
-  }, [initialPost, restoreLocalSnapshot])
+  }, [restoreLocalSnapshot])
 
   const patchForm = useCallback((patch: Partial<FormState>) => {
     setForm((current) => ({ ...current, ...patch }))
@@ -662,7 +652,7 @@ export function WriterClient({
               <History size={15} /> 本地保护
             </strong>
             <span>{localDraftState}</span>
-            <span>打开新文章会自动恢复本地草稿；打开指定文章时只会自动恢复同一篇文章的草稿。</span>
+            <span>刷新页面会自动恢复最后一次本地草稿。</span>
             {localHistory.length > 0 && (
               <div className="writer-history-list" aria-label="本地历史版本">
                 {localHistory.slice(0, 6).map((item) => (
@@ -778,13 +768,7 @@ export function WriterClient({
                   <span>用于文章页顶部 Hero，也优先作为首页/列表卡片图。</span>
                 </div>
                 {mediaPreviewUrl(form.heroImage) ? (
-                  <Image
-                    src={mediaPreviewUrl(form.heroImage) || ''}
-                    alt={mediaLabel(form.heroImage)}
-                    width={640}
-                    height={360}
-                    unoptimized
-                  />
+                  <img src={mediaPreviewUrl(form.heroImage)} alt={mediaLabel(form.heroImage)} />
                 ) : (
                   <div className="writer-image-placeholder">未选择封面图</div>
                 )}
@@ -821,13 +805,7 @@ export function WriterClient({
                   <span>对应后台 SEO image；没有封面图时列表卡片会用它。</span>
                 </div>
                 {mediaPreviewUrl(form.metaImage) ? (
-                  <Image
-                    src={mediaPreviewUrl(form.metaImage) || ''}
-                    alt={mediaLabel(form.metaImage)}
-                    width={640}
-                    height={360}
-                    unoptimized
-                  />
+                  <img src={mediaPreviewUrl(form.metaImage)} alt={mediaLabel(form.metaImage)} />
                 ) : (
                   <div className="writer-image-placeholder">未选择列表/SEO 图</div>
                 )}
