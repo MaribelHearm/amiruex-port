@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   CheckCircle2,
@@ -768,7 +769,13 @@ export function WriterClient({
                   <span>用于文章页顶部 Hero，也优先作为首页/列表卡片图。</span>
                 </div>
                 {mediaPreviewUrl(form.heroImage) ? (
-                  <img src={mediaPreviewUrl(form.heroImage)} alt={mediaLabel(form.heroImage)} />
+                  <Image
+                    src={mediaPreviewUrl(form.heroImage) || ''}
+                    alt={mediaLabel(form.heroImage)}
+                    width={640}
+                    height={360}
+                    unoptimized
+                  />
                 ) : (
                   <div className="writer-image-placeholder">未选择封面图</div>
                 )}
@@ -805,7 +812,13 @@ export function WriterClient({
                   <span>对应后台 SEO image；没有封面图时列表卡片会用它。</span>
                 </div>
                 {mediaPreviewUrl(form.metaImage) ? (
-                  <img src={mediaPreviewUrl(form.metaImage)} alt={mediaLabel(form.metaImage)} />
+                  <Image
+                    src={mediaPreviewUrl(form.metaImage) || ''}
+                    alt={mediaLabel(form.metaImage)}
+                    width={640}
+                    height={360}
+                    unoptimized
+                  />
                 ) : (
                   <div className="writer-image-placeholder">未选择列表/SEO 图</div>
                 )}
