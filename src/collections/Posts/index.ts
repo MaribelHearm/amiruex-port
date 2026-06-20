@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { validations } from 'payload'
 
 import {
   AlignFeature,
@@ -15,6 +16,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { MarkdownImportFeature } from '@/features/MarkdownImport'
+import { markdownToSafeHtml } from '@/lib/writer/markdown'
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Banner } from '../../blocks/Banner/config'
@@ -151,6 +153,65 @@ export const Posts: CollectionConfig<'posts'> = {
               },
             },
             {
+              name: 'writerOpenField',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: '@/components/admin/WriterOpenField#WriterOpenField',
+                },
+              },
+            },
+            {
+              name: 'contentSource',
+              type: 'radio',
+              defaultValue: 'writerMarkdown',
+              options: [
+                {
+                  label: 'Payload 富文本（旧文章兼容）',
+                  value: 'payloadLexical',
+                },
+                {
+                  label: 'Writer Markdown',
+                  value: 'writerMarkdown',
+                },
+              ],
+              admin: {
+                description: '选择正文来源。旧文章继续使用 Payload 富文本；Writer Markdown 会在保存时生成安全 HTML 供前台渲染。',
+                layout: 'horizontal',
+              },
+            },
+            {
+              name: 'contentMarkdown',
+              type: 'textarea',
+              admin: {
+                condition: (_data, siblingData) => siblingData?.contentSource === 'writerMarkdown',
+                description: 'Markdown-first 正文源。保存时由服务端转换并清洗为 contentHtml，前台优先渲染该安全 HTML。',
+                rows: 24,
+              },
+            },
+            {
+              name: 'contentHtml',
+              type: 'textarea',
+              admin: {
+                condition: (_data, siblingData) => siblingData?.contentSource === 'writerMarkdown',
+                description: '服务端从 Markdown 生成的安全 HTML。通常无需手改；前台不会信任未经服务端生成/清洗的客户端 HTML。',
+                readOnly: true,
+                rows: 18,
+              },
+            },
+            {
+              name: 'writerUpdatedAt',
+              type: 'date',
+              admin: {
+                condition: (_data, siblingData) => siblingData?.contentSource === 'writerMarkdown',
+                date: {
+                  pickerAppearance: 'dayAndTime',
+                },
+                description: 'Writer Markdown 内容最近一次由服务端重新生成 HTML 的时间。',
+                readOnly: true,
+              },
+            },
+            {
               name: 'content',
               type: 'richText',
               editor: lexicalEditor({
@@ -171,8 +232,24 @@ export const Posts: CollectionConfig<'posts'> = {
                   ]
                 },
               }),
+              admin: {
+                condition: (_data, siblingData) => siblingData?.contentSource !== 'writerMarkdown',
+              },
               label: false,
               required: true,
+              validate: (value, options) => {
+                if (
+                  'contentSource' in options.siblingData &&
+                  options.siblingData.contentSource === 'writerMarkdown'
+                ) {
+                  return true
+                }
+
+                return validations.richText(value, {
+                  ...options,
+                  required: true,
+                })
+              },
             },
           ],
           label: '正文内容',
@@ -291,6 +368,21 @@ export const Posts: CollectionConfig<'posts'> = {
     }),
   ],
   hooks: {
+    beforeValidate: [
+      async ({ data, originalDoc }) => {
+        if (data?.contentSource !== 'writerMarkdown') {
+          return data
+        }
+
+        const nextMarkdown = data.contentMarkdown ?? originalDoc?.contentMarkdown ?? ''
+
+        return {
+          ...data,
+          contentHtml: await markdownToSafeHtml(nextMarkdown),
+          writerUpdatedAt: new Date().toISOString(),
+        }
+      },
+    ],
     afterChange: [revalidatePost],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],

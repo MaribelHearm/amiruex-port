@@ -9,7 +9,10 @@ import { CMSLink } from '@/components/Link'
 import Link from 'next/link'
 import { SearchIcon, LayoutDashboard, ShieldCheck, House, PenLine, Menu, X } from 'lucide-react'
 
-export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = ({ data, isLoggedIn }) => {
+export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = ({
+  data,
+  isLoggedIn,
+}) => {
   const pathname = usePathname()
   const navItems = data?.navItems || []
   const isHome = pathname === '/'
@@ -52,11 +55,34 @@ export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = (
     }
   }
 
+  const navigateHome = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      pathname === '/'
+    ) {
+      return
+    }
+
+    event.preventDefault()
+    window.location.assign('/')
+  }
+
   return (
     <nav className="site-nav" aria-label="主导航" ref={navRef}>
       <div className="site-nav__desktop">
         {!isHome && (
-          <Link href="/" className="site-nav__home" title="回到主页">
+          <Link
+            href="/"
+            className="site-nav__home"
+            title="回到主页"
+            aria-label="回到主页"
+            onClick={navigateHome}
+          >
             <House className="w-4 h-4" />
           </Link>
         )}
@@ -94,7 +120,8 @@ export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = (
 
         {navItems.map(({ link }, i) => {
           const href = typeof link?.url === 'string' ? link.url : ''
-          const isActive = href === '/' ? pathname === '/' : Boolean(href) && pathname?.startsWith(href)
+          const isActive =
+            href === '/' ? pathname === '/' : Boolean(href) && pathname?.startsWith(href)
 
           return (
             <CMSLink
@@ -160,7 +187,7 @@ export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = (
         onClick={onMobilePanelClick}
       >
         {!isHome && (
-          <Link href="/" className="site-nav__mobile-link">
+          <Link href="/" className="site-nav__mobile-link" onClick={navigateHome}>
             回到主页
           </Link>
         )}
@@ -198,7 +225,8 @@ export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = (
 
         {navItems.map(({ link }, i) => {
           const href = typeof link?.url === 'string' ? link.url : ''
-          const isActive = href === '/' ? pathname === '/' : Boolean(href) && pathname?.startsWith(href)
+          const isActive =
+            href === '/' ? pathname === '/' : Boolean(href) && pathname?.startsWith(href)
 
           return (
             <CMSLink
@@ -229,7 +257,11 @@ export const HeaderNav: React.FC<{ data: HeaderType; isLoggedIn?: boolean }> = (
         )}
 
         {isLoggedIn && (
-          <Link href="/admin" className="site-nav__mobile-link site-nav__mobile-link--admin" title="进入后台">
+          <Link
+            href="/admin"
+            className="site-nav__mobile-link site-nav__mobile-link--admin"
+            title="进入后台"
+          >
             编辑后台
           </Link>
         )}

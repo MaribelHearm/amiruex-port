@@ -26,6 +26,7 @@ export default async function SectionPostsPage({ section }: SectionPostsPageProp
 
   const posts = await payload.find({
     collection: 'posts',
+      draft: false,
     depth: 1,
     limit: 24,
     overrideAccess: false,

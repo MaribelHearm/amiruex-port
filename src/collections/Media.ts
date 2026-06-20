@@ -34,6 +34,15 @@ export const Media: CollectionConfig = {
       //required: true,
     },
     {
+      name: 'writerFileHash',
+      type: 'text',
+      index: true,
+      admin: {
+        description: 'Writer 上传去重使用的 SHA-256。',
+        readOnly: true,
+      },
+    },
+    {
       name: 'caption',
       type: 'richText',
       editor: lexicalEditor({

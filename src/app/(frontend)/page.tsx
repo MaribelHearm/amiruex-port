@@ -45,6 +45,7 @@ export default async function HomePage() {
     const [latestResult, featuredResult, fragmentsResult] = await Promise.all([
       payload.find({
         collection: 'posts',
+        draft: false,
         depth: 0,
         limit: 4,
         overrideAccess: false,
@@ -52,6 +53,7 @@ export default async function HomePage() {
       }),
       payload.find({
         collection: 'posts',
+        draft: false,
         depth: 0,
         limit: 2,
         overrideAccess: false,

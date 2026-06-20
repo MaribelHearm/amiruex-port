@@ -26,6 +26,9 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@milkdown/crepe": "^7.21.2",
+    "@milkdown/kit": "^7.21.2",
+    "@milkdown/react": "^7.21.2",
     "@payloadcms/admin-bar": "3.80.0",
     "@payloadcms/db-mongodb": "3.80.0",
     "@payloadcms/live-preview-react": "3.80.0",
@@ -56,9 +59,15 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "7.71.1",
+    "rehype-sanitize": "^6.0.0",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
     "sharp": "0.34.2",
     "tailwind-merge": "^3.4.0",
-    "tencentcloud-sdk-nodejs": "^4.1.211"
+    "tencentcloud-sdk-nodejs": "^4.1.211",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

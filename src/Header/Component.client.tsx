@@ -63,6 +63,26 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, preview }) => 
     setIsLoggedIn(Boolean(user?.id))
   }, [])
 
+  const navigateHome = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        pathname === '/'
+      ) {
+        return
+      }
+
+      event.preventDefault()
+      window.location.assign('/')
+    },
+    [pathname],
+  )
+
   return (
     <header
       className="site-header"
@@ -80,7 +100,13 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, preview }) => 
       </div>
 
       <div className="site-header__inner" ref={innerRef}>
-        <Link href="/" className="site-header__logo-container">
+        <Link
+          href="/"
+          className="site-header__logo-container"
+          aria-label="回到首页"
+          title="回到首页"
+          onClick={navigateHome}
+        >
           <Logo loading="eager" priority="high" className="site-header__logo" />
         </Link>
         <HeaderNav data={data} isLoggedIn={isLoggedIn} />

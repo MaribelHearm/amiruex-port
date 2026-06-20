@@ -42,6 +42,7 @@ export default async function CategoryPage({ params }: Args) {
 
   const posts = await payload.find({
     collection: 'posts',
+      draft: false,
     depth: 1,
     limit: POSTS_PAGE_SIZE,
     overrideAccess: false,
