@@ -7,13 +7,16 @@ import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
 import RichText from '@/components/RichText'
+import { cn } from '@/utilities/ui'
 
 import type { Post } from '@/payload-types'
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { PostHero } from '@/heros/PostHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { WriterContentEnhancer } from '@/components/writer/WriterContentEnhancer'
 import { BackgroundFX } from '@/components/BackgroundFX'
 
 export async function generateStaticParams() {
@@ -40,6 +43,10 @@ type Args = {
   params: Promise<{
     slug?: string
   }>
+}
+
+const isDefaultTypedEditorState = (content: Post['content']): content is DefaultTypedEditorState => {
+  return Boolean(content?.root)
 }
 
 export default async function Post({ params: paramsPromise }: Args) {
@@ -71,7 +78,14 @@ export default async function Post({ params: paramsPromise }: Args) {
         {/* 卡片：72rem，内部 prose 限宽 52rem 保证阅读舒适 */}
         <div className="post-body__surface max-w-[72rem] mx-auto">
           <div className="max-w-[52rem] mx-auto">
-            <RichText data={post.content} enableGutter={false} enableProse />
+            {post.contentSource === 'writerMarkdown' && post.contentHtml ? (
+              <WriterContentEnhancer
+                className={cn('payload-richtext max-w-none mx-auto prose md:prose-md dark:prose-invert')}
+                html={post.contentHtml}
+              />
+            ) : isDefaultTypedEditorState(post.content) ? (
+              <RichText data={post.content} enableGutter={false} enableProse />
+            ) : null}
           </div>
         </div>
         {post.relatedPosts && post.relatedPosts.length > 0 && (
