@@ -29,13 +29,15 @@ export default async function WriterPage({ searchParams }: Args) {
     throw error
   }
 
-  const { payload } = auth
+  const { payload, user } = auth
   const { id, slug } = await searchParams
 
   const [initialPost, postsResult, categoriesResult, usersResult] = await Promise.all([
-    loadInitialPost({ id, slug, payload }),
+    loadInitialPost({ id, slug, payload, user }),
     payload.find({
       collection: 'posts',
+      user,
+      overrideAccess: false,
       depth: 0,
       draft: true,
       limit: 30,
@@ -51,6 +53,8 @@ export default async function WriterPage({ searchParams }: Args) {
     }),
     payload.find({
       collection: 'categories',
+      user,
+      overrideAccess: false,
       depth: 0,
       limit: 100,
       pagination: false,
@@ -62,6 +66,8 @@ export default async function WriterPage({ searchParams }: Args) {
     }),
     payload.find({
       collection: 'users',
+      user,
+      overrideAccess: false,
       depth: 0,
       limit: 50,
       pagination: false,
@@ -87,16 +93,26 @@ type LoadInitialPostArgs = {
   id?: string
   slug?: string
   payload: Awaited<ReturnType<typeof requireWriterUser>>['payload']
+  user: Awaited<ReturnType<typeof requireWriterUser>>['user']
 }
 
-async function loadInitialPost({ id, slug, payload }: LoadInitialPostArgs) {
+async function loadInitialPost({ id, slug, payload, user }: LoadInitialPostArgs) {
   if (id) {
-    return payload.findByID({ collection: 'posts', id, depth: 2, draft: true })
+    return payload.findByID({
+      collection: 'posts',
+      id,
+      user,
+      overrideAccess: false,
+      depth: 2,
+      draft: true,
+    })
   }
 
   if (slug) {
     const result = await payload.find({
       collection: 'posts',
+      user,
+      overrideAccess: false,
       depth: 2,
       draft: true,
       limit: 1,

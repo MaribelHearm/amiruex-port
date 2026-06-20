@@ -191,6 +191,11 @@ function normalizeFormState(form: FormState): FormState {
   }
 }
 
+function localSnapshotMatchesPost(snapshot: LocalDraftSnapshot, post: WriterPostDocument | null) {
+  if (!post) return true
+  return snapshot.form?.id === post.id
+}
+
 function tagsFromText(value: string): string[] {
   return value
     .split(',')
@@ -287,15 +292,19 @@ export function WriterClient({
     setLocalHistory(history)
 
     const snapshot = readLocalSnapshot(localDraftKey)
-    if (snapshot) {
+    if (snapshot && localSnapshotMatchesPost(snapshot, initialPost)) {
       restoreLocalSnapshot(snapshot, '本地自动保存')
       setLocalDraftState(`已恢复本地草稿：${formatSaveTime(snapshot.updatedAt)}`)
+    } else if (snapshot && initialPost) {
+      setLocalDraftState(
+        `检测到另一篇文章的本地草稿：${formatSaveTime(snapshot.updatedAt)}，已保留在历史里，未覆盖当前文章。`,
+      )
     } else {
       setLocalDraftState('本地自动保存已启用')
     }
 
     localAutosaveReadyRef.current = true
-  }, [restoreLocalSnapshot])
+  }, [initialPost, restoreLocalSnapshot])
 
   const patchForm = useCallback((patch: Partial<FormState>) => {
     setForm((current) => ({ ...current, ...patch }))
@@ -653,7 +662,7 @@ export function WriterClient({
               <History size={15} /> 本地保护
             </strong>
             <span>{localDraftState}</span>
-            <span>刷新页面会自动恢复最后一次本地草稿。</span>
+            <span>打开新文章会自动恢复本地草稿；打开指定文章时只会自动恢复同一篇文章的草稿。</span>
             {localHistory.length > 0 && (
               <div className="writer-history-list" aria-label="本地历史版本">
                 {localHistory.slice(0, 6).map((item) => (
