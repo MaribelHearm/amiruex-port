@@ -264,7 +264,23 @@ export interface Post {
    * 文章封面图。显示在文章页顶部全屏 Hero 区，也作为卡片列表的封面缩略图（优先级高于 SEO 图）。建议尺寸 1920×1080 或更宽。
    */
   heroImage?: (string | null) | Media;
-  content: {
+  /**
+   * 选择正文来源。旧文章继续使用 Payload 富文本；Writer Markdown 会在保存时生成安全 HTML 供前台渲染。
+   */
+  contentSource?: ('payloadLexical' | 'writerMarkdown') | null;
+  /**
+   * Markdown-first 正文源。保存时由服务端转换并清洗为 contentHtml，前台优先渲染该安全 HTML。
+   */
+  contentMarkdown?: string | null;
+  /**
+   * 服务端从 Markdown 生成的安全 HTML。通常无需手改；前台不会信任未经服务端生成/清洗的客户端 HTML。
+   */
+  contentHtml?: string | null;
+  /**
+   * Writer Markdown 内容最近一次由服务端重新生成 HTML 的时间。
+   */
+  writerUpdatedAt?: string | null;
+  content?: {
     root: {
       type: string;
       children: {
@@ -278,7 +294,7 @@ export interface Post {
       version: number;
     };
     [k: string]: unknown;
-  };
+  } | null;
   /**
    * 手动指定相关文章，显示在正文底部「延伸阅读」区。留空则不展示该区块。
    */
@@ -345,6 +361,10 @@ export interface Category {
 export interface Media {
   id: string;
   alt?: string | null;
+  /**
+   * Writer 上传去重使用的 SHA-256。
+   */
+  writerFileHash?: string | null;
   caption?: {
     root: {
       type: string;
@@ -1350,6 +1370,10 @@ export interface PostsSelect<T extends boolean = true> {
   categories?: T;
   tags?: T;
   heroImage?: T;
+  contentSource?: T;
+  contentMarkdown?: T;
+  contentHtml?: T;
+  writerUpdatedAt?: T;
   content?: T;
   relatedPosts?: T;
   meta?:
@@ -1379,6 +1403,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  writerFileHash?: T;
   caption?: T;
   folder?: T;
   updatedAt?: T;
