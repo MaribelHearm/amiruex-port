@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 function getPostIDFromPath(pathname: string) {
   const match = pathname.match(/\/admin\/collections\/posts\/([^/?#]+)/)
@@ -9,10 +9,11 @@ function getPostIDFromPath(pathname: string) {
 }
 
 export function WriterOpenField() {
-  const [postID] = useState(() => {
-    if (typeof window === 'undefined') return ''
-    return getPostIDFromPath(window.location.pathname)
-  })
+  const [postID, setPostID] = useState('')
+
+  useEffect(() => {
+    setPostID(getPostIDFromPath(window.location.pathname))
+  }, [])
 
   const writerHref = useMemo(() => {
     if (!postID) return '/private/write'
@@ -30,23 +31,11 @@ export function WriterOpenField() {
           'linear-gradient(135deg, color-mix(in srgb, var(--theme-elevation-50) 84%, #8b5cf6 16%), var(--theme-elevation-50))',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 14,
-        }}
-      >
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
         <div style={{ minWidth: 260, flex: '1 1 360px' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
-            推荐正文编辑器：Writer 工作台
-          </div>
+          <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>推荐正文编辑器：Writer 工作台</div>
           <div style={{ color: 'var(--theme-elevation-500)', fontSize: 12, lineHeight: 1.55 }}>
-            Payload 自带富文本保留给旧文章兼容。粘贴 AI
-            Markdown、拖拽图片、论坛块、右侧预览和本地历史，优先用 Writer
-            工作台；保存后会回写当前文章。
+            Payload 自带富文本保留给旧文章兼容。粘贴 AI Markdown、拖拽图片、论坛块、右侧预览和本地历史，优先用 Writer 工作台；保存后会回写当前文章。
           </div>
         </div>
         <a
