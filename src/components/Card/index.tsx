@@ -46,9 +46,9 @@ export const Card: React.FC<{
             imgClassName="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
           />
         ) : (
-          /* 无封面图时使用站点默认背景图作为 fallback */
+          /* 无封面图时使用轻量派生背景图作为 fallback，避免拉取原始大 PNG */
           <img
-            src="/assets/backgrounds/1.png"
+            src="/assets/backgrounds/homepage/original-like-768.webp"
             alt=""
             aria-hidden
             className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110 brightness-50"

@@ -266,11 +266,50 @@
   content: '';
   position: absolute;
   inset: -12px; /* 额外扩展，吸收 blur 边缘虚化 */
+  /* PNG fallback for browsers without image-set(); default derivative is original-like. */
   background-image: url('/assets/backgrounds/1.png');
+  background-image: image-set(
+    url('/assets/backgrounds/homepage/original-like-768.avif') type('image/avif'),
+    url('/assets/backgrounds/homepage/original-like-768.webp') type('image/webp'),
+    url('/assets/backgrounds/1.png') type('image/png')
+  );
   background-size: cover;
   background-position: center;
   filter: blur(5px);
   opacity: 0.85;
+}
+
+@media (min-width: 768px) {
+  .bgfx__photo::before {
+    background-image: url('/assets/backgrounds/1.png');
+    background-image: image-set(
+      url('/assets/backgrounds/homepage/original-like-1280.avif') type('image/avif'),
+      url('/assets/backgrounds/homepage/original-like-1280.webp') type('image/webp'),
+      url('/assets/backgrounds/1.png') type('image/png')
+    );
+  }
+}
+
+@media (min-width: 1280px) {
+  .bgfx__photo::before {
+    background-image: url('/assets/backgrounds/1.png');
+    background-image: image-set(
+      url('/assets/backgrounds/homepage/original-like-1920.avif') type('image/avif'),
+      url('/assets/backgrounds/homepage/original-like-1920.webp') type('image/webp'),
+      url('/assets/backgrounds/1.png') type('image/png')
+    );
+  }
+}
+
+@media (min-width: 1920px) {
+  .bgfx__photo::before {
+    background-image: url('/assets/backgrounds/1.png');
+    background-image: image-set(
+      url('/assets/backgrounds/homepage/original-like-2560.avif') type('image/avif'),
+      url('/assets/backgrounds/homepage/original-like-2560.webp') type('image/webp'),
+      url('/assets/backgrounds/1.png') type('image/png')
+    );
+  }
 }
 
 /* 渐变遮罩：随滚动收缩（通过 JS 写入 --overlay-retreat 到 :root）
