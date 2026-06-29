@@ -1,0 +1,7 @@
+{"action": "both", "file": "src/app/(standalone)/private/portal/PortalClient.tsx", "kind": "source", "reason": "dashboard UI entry/client state and service card rendering", "timestamp": "2026-06-29T19:27:31+08:00"}
+{"action": "both", "file": "src/app/(standalone)/private/portal/portal.css", "kind": "source", "reason": "portal dashboard visual system and responsive CSS", "timestamp": "2026-06-29T19:27:31+08:00"}
+{"action": "both", "file": "src/app/(standalone)/private/portal/services.ts", "kind": "source", "reason": "portal service data loading and registry merge", "timestamp": "2026-06-29T19:27:31+08:00"}
+{"action": "both", "file": "src/app/(standalone)/private/portal/consoleRegistry.ts", "kind": "source", "reason": "console registry schema/default services/runtime metadata", "timestamp": "2026-06-29T19:27:31+08:00"}
+{"action": "both", "file": "src/app/(standalone)/private/portal/api/status/route.ts", "kind": "source", "reason": "status API auth, snapshot merge, live health fallback", "timestamp": "2026-06-29T19:27:31+08:00"}
+{"action": "both", "file": ".roo/rules/design-system.md", "kind": "source", "reason": "mandatory portal visual style constraints", "timestamp": "2026-06-29T19:27:31+08:00"}
+{"action": "both", "file": "package.json", "kind": "source", "reason": "validation scripts and build commands", "timestamp": "2026-06-29T19:27:31+08:00"}

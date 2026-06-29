@@ -1,14 +1,10 @@
 import type { Payload } from 'payload'
 
 import type { PortalCategory, User } from '@/payload-types'
+import { loadConsoleRegistry, mergeConsoleMeta } from './consoleRegistry'
+import type { PortalServiceWithConsole } from './consoleRegistry'
 
-export interface PortalService {
-  name: string
-  desc: string
-  category: string
-  internal?: string
-  external?: string
-}
+export type PortalService = PortalServiceWithConsole
 
 export interface PortalConfig {
   services: PortalService[]
@@ -16,177 +12,9 @@ export interface PortalConfig {
   portalTagline: string
 }
 
-const DEFAULT_SERVICES: PortalService[] = [
-  {
-    name: 'LobeChat',
-    desc: 'AI 对话平台',
-    category: '核心应用',
-    internal: 'http://192.168.1.103:3210',
-    external: 'https://ai.amireux.chat',
-  },
-  {
-    name: 'OpenClaw',
-    desc: 'AI 自动化工作台',
-    category: '核心应用',
-    internal: 'http://192.168.1.103:18789',
-    external: 'https://oc.amireux.chat',
-  },
-  {
-    name: 'Dify',
-    desc: '工作流 / 建档 / 自动化编排',
-    category: '核心应用',
-    external: 'https://dify.amireux.chat',
-  },
-  {
-    name: 'Wiki.js',
-    desc: '知识库系统',
-    category: '核心应用',
-    internal: 'http://192.168.1.103:3005',
-    external: 'https://wiki.amireux.chat',
-  },
-  {
-    name: 'Immich',
-    desc: '照片管理系统',
-    category: '核心应用',
-    internal: 'http://192.168.1.103:2283',
-    external: 'https://p.amireux.chat',
-  },
-  {
-    name: 'Jellyfin',
-    desc: '媒体服务器',
-    category: '核心应用',
-    internal: 'http://192.168.1.103:8096',
-    external: 'https://media.amireux.chat',
-  },
-  {
-    name: 'Home Assistant',
-    desc: '智能家居自动化',
-    category: '核心应用',
-    internal: 'http://192.168.1.103:8123',
-    external: 'https://ha.amireux.chat',
-  },
-  {
-    name: 'Next Portal',
-    desc: '个人数字门户 / CMS 后台',
-    category: '核心应用',
-    external: 'https://amireux.chat',
-  },
-  {
-    name: 'New API',
-    desc: 'LLM 聚合入口 / API 前门',
-    category: 'API 与代理',
-    internal: 'http://192.168.1.103:3300',
-    external: 'https://clip.amireux.chat',
-  },
-  {
-    name: 'EasyProxies',
-    desc: '代理池管理 / 多端口出口池',
-    category: 'API 与代理',
-    internal: 'http://192.168.1.103:9888',
-    external: 'https://proxy.amireux.chat',
-  },
-  {
-    name: 'GOT-OCR',
-    desc: '高精度 OCR 识别服务',
-    category: 'API 与代理',
-    internal: 'http://192.168.1.103:8866',
-  },
-  {
-    name: 'OutlookMail Plus',
-    desc: '邮箱接码 / 验证码提取 / Outlook OAuth',
-    category: 'API 与代理',
-    internal: 'http://192.168.1.103:5002',
-  },
-  {
-    name: 'Dockge',
-    desc: 'Docker Compose 管理面板',
-    category: '基础设施',
-    internal: 'http://192.168.1.103:5001',
-    external: 'https://dockge.amireux.chat',
-  },
-  {
-    name: 'Traefik',
-    desc: '反向代理 Dashboard',
-    category: '基础设施',
-    internal: 'http://192.168.1.103:8080',
-    external: 'https://traefik.amireux.chat',
-  },
-  {
-    name: 'Aria2 / AriaNg',
-    desc: '下载管理',
-    category: '基础设施',
-    internal: 'http://192.168.1.103:6880',
-    external: 'https://aria.amireux.chat',
-  },
-  {
-    name: 'CasaOS',
-    desc: 'NAS 管理面板',
-    category: '基础设施',
-    internal: 'http://192.168.1.103:8580',
-  },
-  {
-    name: 'Telegram Downloader',
-    desc: 'Telegram 媒体下载',
-    category: '基础设施',
-    internal: 'http://192.168.1.103:5000',
-  },
-  {
-    name: 'MCP Wiki',
-    desc: 'Wiki 读写工具',
-    category: 'MCP 工具',
-    internal: 'http://192.168.1.103:3001/health',
-  },
-  {
-    name: 'MCP Wiki Incremental',
-    desc: 'Wiki 增量更新',
-    category: 'MCP 工具',
-    internal: 'http://192.168.1.103:3007/health',
-  },
-  {
-    name: 'MCP Search',
-    desc: '搜索与网页抓取',
-    category: 'MCP 工具',
-    internal: 'http://192.168.1.103:3002/health',
-  },
-  {
-    name: 'MCP D2',
-    desc: 'D2 图表生成',
-    category: 'MCP 工具',
-    internal: 'http://192.168.1.103:3003/health',
-  },
-  {
-    name: 'MCP Mermaid',
-    desc: 'Mermaid 图表',
-    category: 'MCP 工具',
-    internal: 'http://192.168.1.103:3006/health',
-  },
-  {
-    name: 'MCP Media',
-    desc: '媒体 / B站相关工具',
-    category: 'MCP 工具',
-    internal: 'http://192.168.1.103:3004/health',
-  },
-  {
-    name: 'NapCat',
-    desc: 'QQ Bot / OneBot 主后台',
-    category: 'QQ Bot',
-    internal: 'http://192.168.1.103:6099',
-  },
-  {
-    name: 'NapCat Exporter',
-    desc: 'QCE 专用 NapCat 实例后台',
-    category: 'QQ Bot',
-    internal: 'http://192.168.1.103:6098',
-  },
-  {
-    name: 'QCE',
-    desc: '聊天记录导出后台',
-    category: 'QQ Bot',
-    internal: 'http://192.168.1.103:40654/qce-v4-tool',
-  },
-]
+const DEFAULT_SERVICES: PortalService[] = []
 
-const DEFAULT_CATEGORIES = ['核心应用', 'API 与代理', '基础设施', 'MCP 工具', 'QQ Bot']
+const DEFAULT_CATEGORIES = ['核心应用', 'API 与代理', '基础设施', 'MCP 工具', '自动化任务', 'QQ Bot']
 const DEFAULT_PORTAL_TAGLINE = 'DIGITAL SOVEREIGNTY PORTAL · 192.168.1.103'
 
 interface PortalCategoryDoc {
@@ -206,19 +34,24 @@ interface PortalServiceDoc {
   enabled?: boolean | null
 }
 
-function buildDefaultPortalConfig(): PortalConfig {
-  const categories = Array.from(new Set(DEFAULT_SERVICES.map((s) => s.category)))
+async function buildDefaultPortalConfig(): Promise<PortalConfig> {
+  const registry = await loadConsoleRegistry()
+  const services = mergeConsoleMeta([], registry)
+  const categories = Array.from(new Set(services.map((s) => s.category)))
 
   return {
-    services: DEFAULT_SERVICES,
+    services,
     categories: categories.length > 0 ? categories : DEFAULT_CATEGORIES,
     portalTagline: process.env.PORTAL_TAGLINE || DEFAULT_PORTAL_TAGLINE,
   }
 }
 
-async function seedPortalDataIfEmpty(payload: Payload, user: User) {
+async function syncPortalDataFromRegistry(payload: Payload, user: User) {
+  const registry = await loadConsoleRegistry()
+  const registryServices = mergeConsoleMeta([], registry)
+  const registryServiceNames = new Set(registryServices.map((service) => service.name))
   const categoryNames = Array.from(
-    new Set([...DEFAULT_CATEGORIES, ...DEFAULT_SERVICES.map((s) => s.category)]),
+    new Set([...DEFAULT_CATEGORIES, ...registryServices.map((s) => s.category)]),
   )
 
   const [existingCategories, existingServices] = await Promise.all([
@@ -286,9 +119,7 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
     }
   })
 
-  const allowedServiceNames = new Set(DEFAULT_SERVICES.map((service) => service.name))
-
-  for (const [index, service] of DEFAULT_SERVICES.entries()) {
+  for (const [index, service] of registryServices.entries()) {
     const categoryId = categoryMap.get(service.category)
 
     if (!categoryId) {
@@ -333,28 +164,33 @@ async function seedPortalDataIfEmpty(payload: Payload, user: User) {
     })
   }
 
-  for (const service of existingServices.docs as PortalServiceDoc[]) {
-    if (!service.id || !service.name || allowedServiceNames.has(service.name)) {
-      continue
-    }
+  if (!registry.fallback && registryServices.length > 0) {
+    for (const service of existingServices.docs as PortalServiceDoc[]) {
+      if (!service.id || !service.name || registryServiceNames.has(service.name)) {
+        continue
+      }
 
-    await payload.update({
-      collection: 'portal-services',
-      id: service.id,
-      data: {
-        enabled: false,
-      },
-      user,
-      overrideAccess: false,
-    })
+      await payload.update({
+        collection: 'portal-services',
+        id: service.id,
+        data: {
+          enabled: false,
+        },
+        user,
+        overrideAccess: false,
+      })
+    }
   }
 }
 
 export async function getPortalConfig(payload: Payload, user: User): Promise<PortalConfig> {
-  const fallback = buildDefaultPortalConfig()
+  const fallback = await buildDefaultPortalConfig()
 
   try {
-    await seedPortalDataIfEmpty(payload, user)
+    await syncPortalDataFromRegistry(payload, user)
+
+    const registry = await loadConsoleRegistry()
+    const registryServices = mergeConsoleMeta([], registry)
 
     const [categoryResult, serviceResult] = await Promise.all([
       payload.find({
@@ -381,7 +217,7 @@ export async function getPortalConfig(payload: Payload, user: User): Promise<Por
       .map((item) => item.name)
       .filter(Boolean)
 
-    const services = (serviceResult.docs as PortalServiceDoc[])
+    const dbServices = (serviceResult.docs as PortalServiceDoc[])
       .filter((item) => item.enabled !== false)
       .map((item) => {
         const categoryName = typeof item.category === 'string' ? undefined : item.category?.name
@@ -395,6 +231,13 @@ export async function getPortalConfig(payload: Payload, user: User): Promise<Por
         } satisfies PortalService
       })
 
+    const sourceServices = !registry.fallback && registryServices.length > 0
+      ? registryServices
+      : dbServices.length > 0
+        ? dbServices
+        : fallback.services
+    const services = mergeConsoleMeta(sourceServices, registry)
+
     if (services.length === 0) {
       return fallback
     }
@@ -402,7 +245,9 @@ export async function getPortalConfig(payload: Payload, user: User): Promise<Por
     return {
       services,
       categories:
-        categories.length > 0 ? categories : Array.from(new Set(services.map((s) => s.category))),
+        categories.length > 0
+          ? Array.from(new Set([...categories, ...services.map((s) => s.category)]))
+          : Array.from(new Set(services.map((s) => s.category))),
       portalTagline: process.env.PORTAL_TAGLINE || DEFAULT_PORTAL_TAGLINE,
     }
   } catch {

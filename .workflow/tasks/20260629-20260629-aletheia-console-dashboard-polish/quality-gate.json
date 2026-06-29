@@ -1,0 +1,40 @@
+{
+  "schema": "workflow-quality-gate.v1",
+  "task": "Aletheia Console dashboard polish",
+  "generated_at": "2026-06-29T23:56:00+08:00",
+  "result": "pass",
+  "gates": {
+    "acceptance_complete": {
+      "status": "pass",
+      "evidence": "TASK.md acceptance satisfied; final Aletheia Console dashboard deployed to /private/portal and subagent QA blockers resolved."
+    },
+    "validation_run": {
+      "status": "pass",
+      "evidence": "tsc, targeted eslint, diff check, snapshot py_compile/json validation, systemd status and online curl smoke passed after 49-service registry refresh."
+    },
+    "diff_reviewed": {
+      "status": "pass",
+      "evidence": "diff-risk-reviewer and two read-only subagents reviewed UI/runtime risks; unrelated Aletheia-Ops existing diffs kept out of targeted validation."
+    },
+    "handoff_current": {
+      "status": "pass",
+      "evidence": "HANDOFF.md updated after final 49-service snapshot and deployed image sha256:f3bd5b6b."
+    },
+    "ledger_current": {
+      "status": "pass",
+      "evidence": "ledger contains plan, UI QA, runtime QA, validation and deploy slices through final image."
+    },
+    "no_placeholder_core": {
+      "status": "pass",
+      "evidence": "No fake execution path; L2/action chips are informational only and no action runner exists."
+    },
+    "rollback_known": {
+      "status": "pass",
+      "evidence": "Final rollback tag aletheia-rollback/next-portal:20260629-210858 recorded in validation, handoff and ops note."
+    },
+    "spec_or_parking_updated": {
+      "status": "pass",
+      "evidence": "Ops note, deployment README, snapshot README, LAYOUT_RULES and Obsidian usage note updated."
+    }
+  }
+}
