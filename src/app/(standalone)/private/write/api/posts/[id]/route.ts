@@ -88,7 +88,6 @@ export async function PATCH(req: Request, { params }: Args) {
       collection: 'posts',
       id,
       user,
-      overrideAccess: false,
       depth: 2,
       data: {
         title: parsed.title,

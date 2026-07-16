@@ -77,28 +77,19 @@ function parseWriterPostPayload(body: Record<string, unknown>): WriterPostPayloa
 
 export async function GET(req: Request) {
   try {
-    const { payload, user } = await requireWriterUser()
+    const { payload } = await requireWriterUser()
     const url = new URL(req.url)
     const id = url.searchParams.get('id')
     const slug = url.searchParams.get('slug')
 
     if (id) {
-      const post = await payload.findByID({
-        collection: 'posts',
-        id,
-        user,
-        overrideAccess: false,
-        depth: 2,
-        draft: true,
-      })
+      const post = await payload.findByID({ collection: 'posts', id, depth: 2, draft: true })
       return Response.json({ post: postToWriterDocument(post) })
     }
 
     if (slug) {
       const result = await payload.find({
         collection: 'posts',
-        user,
-        overrideAccess: false,
         depth: 2,
         draft: true,
         limit: 1,
@@ -112,8 +103,6 @@ export async function GET(req: Request) {
 
     const result = await payload.find({
       collection: 'posts',
-      user,
-      overrideAccess: false,
       depth: 0,
       draft: true,
       limit: 30,
@@ -151,7 +140,6 @@ export async function POST(req: Request) {
     const post = await payload.create({
       collection: 'posts',
       user,
-      overrideAccess: false,
       depth: 2,
       data: {
         title: parsed.title,
